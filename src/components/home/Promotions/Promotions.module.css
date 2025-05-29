@@ -1,0 +1,110 @@
+.promotionsContainer {
+    padding: 3rem 1rem;
+    background-color: var(--background-color);
+  }
+  
+  .promotionsContent {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .promotionsHeader {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .promotionsTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+  }
+  
+  .promotionsSubtitle {
+    font-size: 1rem;
+    color: var(--text-color);
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  .featuresGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .featureCard {
+    background-color: var(--card-bg-color);
+    border-radius: 10px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .featureCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .iconContainer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .featureIcon {
+    width: 40px;
+    height: 40px;
+    color: var(--primary-color);
+  }
+  
+  .featureTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+  }
+  
+  .featureDescription {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 992px) {
+    .featuresGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .promotionsContainer {
+      padding: 2rem 1rem;
+    }
+    
+    .promotionsTitle {
+      font-size: 1.75rem;
+    }
+    
+    .promotionsHeader {
+      margin-bottom: 2rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .featuresGrid {
+      grid-template-columns: 1fr;
+    }
+    
+    .promotionsTitle {
+      font-size: 1.5rem;
+    }
+    
+    .featureCard {
+      padding: 1.5rem 1rem;
+    }
+  }

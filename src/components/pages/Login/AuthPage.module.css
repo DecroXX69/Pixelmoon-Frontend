@@ -1,0 +1,24 @@
+.authPageContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+  }
+  
+  .authContentWrapper {
+    flex: 1;
+    /* The Auth component already has its own styling for centering */
+  }
+  
+  .promotionSection {
+    margin-top: 2rem;
+    width: 100%;
+    padding: 0 1rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .authContentWrapper {
+      padding: 0 1rem;
+    }
+  }

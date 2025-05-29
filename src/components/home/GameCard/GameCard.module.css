@@ -1,0 +1,78 @@
+.cardLink {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  
+  .card {
+    background-color: var(--card-bg-color);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .imageContainer {
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+  }
+  
+  .gameImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .card:hover .gameImage {
+    transform: scale(1.05);
+  }
+  
+  .cardContent {
+    padding: 0.75rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .gameName {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-color);
+  }
+  
+  .gamePrice {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin: 0;
+  }
+  
+  [data-theme='dark'] .gamePrice {
+    color: #9ca3af;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 768px) {
+    .cardContent {
+      padding: 0.5rem;
+    }
+    
+    .gameName {
+      font-size: 0.9rem;
+    }
+    
+    .gamePrice {
+      font-size: 0.75rem;
+    }
+  }

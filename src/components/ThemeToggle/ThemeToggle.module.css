@@ -1,0 +1,41 @@
+.toggleButton {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    position: relative;
+    margin-left: 10px;
+  }
+  
+  .toggleButton:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  [data-theme='dark'] .toggleButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .moonIcon,
+  .sunIcon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+  }
+  
+  .moonIcon {
+    color: #000;
+  }
+  
+  .sunIcon {
+    color: #fff;
+  }
+  
+  .toggleButton:hover .moonIcon,
+  .toggleButton:hover .sunIcon {
+    transform: rotate(12deg);
+  }

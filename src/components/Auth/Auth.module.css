@@ -1,0 +1,286 @@
+.authContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 2rem 0;
+    background-color: var(--primary-color);
+  }
+  
+  .authCard {
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+    background-color: var(--secondary-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .authTitle {
+    font-size: 1.8rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  
+  .authForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .formGroup {
+    width: 100%;
+  }
+  
+  .formInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    transition: border-color 0.3s;
+  }
+  
+  .formInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+  
+  .formInput::placeholder {
+    color: #9ca3af;
+  }
+  
+  .authButton {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #1a202c;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .authButton:hover {
+    background-color: #2d3748;
+  }
+  
+  .authButton:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+  }
+  
+  .authLinks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .authLinkItem {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--text-color);
+  }
+  
+  .authLink {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .authLink:hover {
+    text-decoration: underline;
+  }
+  
+  .errorMessage {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border-radius: 5px;
+    text-align: center;
+  }
+  
+  .successMessage {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background-color: #dcfce7;
+    color: #166534;
+    border-radius: 5px;
+    text-align: center;
+  }
+  
+  .formLoader {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+  
+  .formLoader svg {
+    animation: spin 1s linear infinite;
+    color: var(--primary-color);
+  }
+  
+  .passwordContainer {
+    position: relative;
+    width: 100%;
+  }
+  
+  .passwordToggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+  }
+  
+  .passwordToggle:hover {
+    color: var(--text-color);
+  }
+  
+  .rememberMe {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+  }
+  
+  .checkboxLabel {
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+  
+  .socialLogin {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .socialDivider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1rem 0;
+  }
+  
+  .socialDivider::before,
+  .socialDivider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .socialDivider span {
+    padding: 0 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  
+  .socialButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .socialButton:hover {
+    background-color: var(--hover-color);
+  }
+  
+  .socialIcon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Dark mode styles */
+  [data-theme='dark'] .authCard {
+    background-color: var(--card-bg-color);
+  }
+  
+  [data-theme='dark'] .formInput {
+    background-color: var(--card-bg-color);
+    border-color: var(--border-color);
+  }
+  
+  [data-theme='dark'] .authButton {
+    background-color: #3b82f6;
+  }
+  
+  [data-theme='dark'] .authButton:hover {
+    background-color: #2563eb;
+  }
+  
+  [data-theme='dark'] .authLink {
+    color: #60a5fa;
+  }
+  
+  [data-theme='dark'] .socialButton {
+    background-color: var(--card-bg-color);
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Media Queries */
+  @media (max-width: 640px) {
+    .authCard {
+      max-width: 90%;
+      padding: 1.5rem;
+    }
+    
+    .authLinks {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .authTitle {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .authCard {
+      padding: 1.25rem;
+    }
+    
+    .formInput {
+      padding: 0.6rem 0.8rem;
+    }
+    
+    .authButton {
+      padding: 0.6rem;
+    }
+  }

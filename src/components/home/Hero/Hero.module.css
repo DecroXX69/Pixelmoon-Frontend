@@ -1,0 +1,172 @@
+.heroContainer {
+    background-color: var(--primary-color);
+    padding: 2rem 0;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 620px; /* Adjusted to take about half of the front page */
+  }
+  
+  .carousel {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .carouselInner {
+    display: flex;
+    height: 100%;
+    transition: transform 0.5s ease;
+  }
+  
+  .carouselSlide {
+    min-width: 100%;
+    position: relative;
+  }
+  
+  .slideContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 0 4rem;
+    height: 100%;
+  }
+  
+  .gameCard {
+    background-color: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 45%; /* Adjusted to make banners bigger */
+    height: 300px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .gameCard:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .gameImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .carouselControl {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+    font-size: 18px;
+  }
+  
+  .carouselControl:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .prevControl {
+    left: 20px;
+  }
+  
+  .nextControl {
+    right: 20px;
+  }
+  
+  .carouselIndicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+  }
+  
+  .indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .indicator.active {
+    background-color: white;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 1200px) {
+    .gameCard {
+      width: 40%;
+      height: 260px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .heroContainer {
+      height: 400px;
+    }
+    
+    .gameCard {
+      height: 220px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .heroContainer {
+      height: 350px;
+    }
+    
+    .gameCard {
+      width: 45%;
+      height: 180px;
+    }
+    
+    .slideContent {
+      gap: 1rem;
+      padding: 0 2rem;
+    }
+    
+    .carouselControl {
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .heroContainer {
+      height: 300px;
+    }
+    
+    .gameCard {
+      width: 46%;
+      height: 150px;
+    }
+    
+    .carouselControl {
+      width: 36px;
+      height: 36px;
+      font-size: 14px;
+    }
+    
+    .slideContent {
+      gap: 0.5rem;
+      padding: 0 1rem;
+    }
+  }
