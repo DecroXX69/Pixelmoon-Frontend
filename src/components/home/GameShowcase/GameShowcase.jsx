@@ -72,7 +72,7 @@ const GameShowcase = () => {
   const fetchGames = async () => {
     try {
       // Fixed: Use the correct backend URL with port 5000
-      const response = await fetch('https://13.200.154.171:3000/api/games?limit=9');
+      const response = await fetch('https://www.pixelmoonstore.in/api/games?limit=9');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

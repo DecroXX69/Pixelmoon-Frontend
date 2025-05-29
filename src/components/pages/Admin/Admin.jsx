@@ -13,6 +13,7 @@ const AdminPanel = () => {
   const [availablePacks, setAvailablePacks] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const API_BASE = import.meta.env.VITE_API_URL;
   // Game form state
   const [gameForm, setGameForm] = useState({
     name: '',
@@ -93,27 +94,31 @@ useEffect(() => {
 
 
 
-  const fetchGames = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/games', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setGames(data.games || []);
-      } else {
-        setError(data.message || 'Failed to fetch games');
-      }
-    } catch (error) {
-      console.error('Error fetching games:', error);
-      setError('Error fetching games');
-    } finally {
-      setLoading(false);
+ const fetchGames = async () => {
+  try {
+    setLoading(true);
+    const res = await fetch(`${API_BASE}/games`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const ct = res.headers.get('content-type') || '';
+    if (!res.ok || !ct.includes('application/json')) {
+      console.error('fetchGames failed:', await res.text());
+      setError('Failed to fetch games');
+      return;
     }
-  };
+    const data = await res.json();
+    if (data.success) {
+      setGames(data.games || []);
+    } else {
+      setError(data.message || 'Failed to fetch games');
+    }
+  } catch (err) {
+    console.error('Error fetching games:', err);
+    setError('Error fetching games');
+  } finally {
+    setLoading(false);
+  }
+};
 
  const fetchApiServers = async () => {
   if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId) {
@@ -141,19 +146,29 @@ useEffect(() => {
 
 
   const fetchApiPacks = async () => {
-    try {
-      const response = await fetch(`/api/games/api-packs/${gameForm.apiGameId}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setAvailablePacks(data.packs || []);
-      }
-    } catch (error) {
-      console.error('Error fetching packs:', error);
+  try {
+    const url = `${API_BASE}/games/api-packs/${gameForm.apiGameId}`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const ct = res.headers.get('content-type') || '';
+    if (!res.ok || !ct.includes('application/json')) {
+      console.error('fetchApiPacks failed:', await res.text());
+      setAvailablePacks([]);
+      return;
+    }
+    const data = await res.json();
+    if (data.success) {
+      setAvailablePacks(data.packs || []);
+    } else {
       setAvailablePacks([]);
     }
-  };
+  } catch (err) {
+    console.error('Error fetching packs:', err);
+    setAvailablePacks([]);
+  }
+};
+
 
   const clearMessages = () => {
     setError('');
@@ -194,7 +209,7 @@ useEffect(() => {
         return;
       }
 
-      const url = editingGame ? `/api/games/${editingGame._id}` : '/api/games';
+      const url = editingGame ? `${API_BASE}/games/${editingGame._id}` : '/games';
       const method = editingGame ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -309,7 +324,7 @@ useEffect(() => {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/games/${gameId}`, {
+      const response = await fetch(`/games/${gameId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
