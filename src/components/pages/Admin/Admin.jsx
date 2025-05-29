@@ -13,7 +13,6 @@ const AdminPanel = () => {
   const [availablePacks, setAvailablePacks] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
   // Game form state
   const [gameForm, setGameForm] = useState({
     name: '',
@@ -24,6 +23,8 @@ const AdminPanel = () => {
     region: '',
     category: 'Mobile Games'
   });
+// at the top of your Admin.jsx component, after you declare gameForm:
+const isSmile = gameForm.apiProvider === 'smile.one';
 
   // Pack form state for manual entry
   const [packForm, setPackForm] = useState({
@@ -37,6 +38,17 @@ const AdminPanel = () => {
   });
 
   const [selectedGamePacks, setSelectedGamePacks] = useState([]);
+  const token = localStorage.getItem('token');
+
+
+  // near the top of Admin.jsx, after your useState declarations
+useEffect(() => {
+  if (isSmile) {
+    setGameForm(f => ({ ...f, region: 'BR' }));
+  }
+}, [isSmile]);
+
+
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -50,6 +62,36 @@ const AdminPanel = () => {
       fetchApiPacks();
     }
   }, [gameForm.apiGameId, gameForm.apiProvider]);
+
+  useEffect(() => {
+  // if not Smile.one or no gameId, clear and bail
+  if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId) {
+    setAvailablePacks([]);
+    return;
+  }
+
+  (async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/games/api-packs/${gameForm.apiGameId}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || !ct.includes('application/json')) {
+        console.error('Pack-fetch failed:', await res.text());
+        setAvailablePacks([]);
+        return;
+      }
+      const json = await res.json();
+      setAvailablePacks(json.packs || []);
+    } catch (err) {
+      console.error('Error fetching packs:', err);
+      setAvailablePacks([]);
+    }
+  })();
+}, [gameForm.apiProvider, gameForm.apiGameId, token]);
+
+
 
   const fetchGames = async () => {
     try {
@@ -73,20 +115,30 @@ const AdminPanel = () => {
     }
   };
 
-  const fetchApiServers = async () => {
-    try {
-      const response = await fetch(`/api/games/api-servers/${gameForm.apiGameId}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setServerList(data.servers || []);
-      }
-    } catch (error) {
-      console.error('Error fetching servers:', error);
+ const fetchApiServers = async () => {
+  if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId) {
+    setServerList([]);
+    return;
+  }
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/games/api-servers/${gameForm.apiGameId}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    const ct = res.headers.get('content-type') || '';
+    if (!res.ok || !ct.includes('application/json')) {
+      console.error('Server-fetch failed:', await res.text());
       setServerList([]);
+      return;
     }
-  };
+    const json = await res.json();
+    setServerList(json.servers || []);
+  } catch (err) {
+    console.error('Error fetching servers:', err);
+    setServerList([]);
+  }
+};
+
 
   const fetchApiPacks = async () => {
     try {
@@ -490,24 +542,34 @@ const AdminPanel = () => {
                         </div>
 
                         <div className="col-md-6">
-                          <label className="form-label">Region (Server) *</label>
-                          <select
-                            className="form-select"
-                            value={gameForm.region}
-                            onChange={(e) => setGameForm({ ...gameForm, region: e.target.value })}
-                            required
-                          >
-                            <option value="">Select server</option>
-                            {serverList.length > 0
-                              ? serverList.map(s => (
-                                  <option key={s.server_id} value={s.server_id}>
-                                    {s.server_name}
-                                  </option>
-                                )) 
-                              : <option value="0">Global</option>
-                            }
-                          </select>
-                        </div>
+  <label className="form-label">Region (Server) *</label>
+  {isSmile ? (
+    <select className="form-select" value="BR" disabled>
+      <option value="BR">Brazil</option>
+    </select>
+  ) : (
+    <select
+      className="form-select"
+      value={gameForm.region}
+      onChange={e =>
+        setGameForm({ ...gameForm, region: e.target.value })
+      }
+      required
+    >
+      <option value="">Select server</option>
+      {serverList.length > 0
+        ? serverList.map(s => (
+            <option key={s.server_id} value={s.server_id}>
+              {s.server_name}
+            </option>
+          ))
+        : (
+            <option value="0">Global</option>
+          )}
+    </select>
+  )}
+</div>
+
 
                         <div className="col-md-6">
                           <label className="form-label">Category</label>
@@ -575,14 +637,22 @@ const AdminPanel = () => {
                             <h6 className="card-title">Add Pack Manually</h6>
                             <div className="row g-2">
                               <div className="col-md-2">
-                                <input
-                                  type="text"
-                                  className="form-control form-control-sm"
-                                  placeholder="Pack ID"
-                                  value={packForm.packId}
-                                  onChange={(e) => setPackForm({...packForm, packId: e.target.value})}
-                                />
-                              </div>
+  <label className="form-label">Smile.one Pack</label>
+  <select
+    className="form-select"
+    onChange={handleAddPackFromApi}
+    defaultValue=""
+  >
+    <option value="" disabled>
+      Select a pack
+    </option>
+    {availablePacks.map(pack => (
+      <option key={pack.id} value={pack.id}>
+        {pack.spu} — ${pack.price}
+      </option>
+    ))}
+  </select>
+</div>
                               <div className="col-md-2">
                                 <input
                                   type="text"
