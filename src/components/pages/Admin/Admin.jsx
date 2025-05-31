@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './admin.module.css';
-
+import { usePackManagement } from '../../../hooks/usePackManagement';
 const AdminPanel = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('games');
@@ -13,7 +13,17 @@ const AdminPanel = () => {
   const [availablePacks, setAvailablePacks] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [balances, setBalances] = useState(null);
+  // const [editingPack, setEditingPack] = useState(null);
   const API_BASE = import.meta.env.VITE_API_URL;
+  const {
+    editingPack,
+    packForm,
+    setPackForm,
+    handleEditPack,
+    handleUpdatePack,
+    resetPackForm
+  } = usePackManagement(editingGame?._id);
   // Game form state
   const [gameForm, setGameForm] = useState({
     name: '',
@@ -24,151 +34,187 @@ const AdminPanel = () => {
     region: '',
     category: 'Mobile Games'
   });
-// at the top of your Admin.jsx component, after you declare gameForm:
-const isSmile = gameForm.apiProvider === 'smile.one';
+
+  // at the top of your Admin.jsx component, after you declare gameForm:
+  const isSmile = gameForm.apiProvider === 'smile.one';
 
   // Pack form state for manual entry
-  const [packForm, setPackForm] = useState({
-    packId: '',
-    name: '',
-    description: '',
-    amount: '',
-    retailPrice: '',
-    resellerPrice: '',
-    costPrice: ''
-  });
+  // const [packForm, setPackForm] = useState({
+  //   packId: '',
+  //   name: '',
+  //   description: '',
+  //   amount: '',
+  //   retailPrice: '',
+  //   resellerPrice: '',
+  //   costPrice: ''
+  // });
 
   const [selectedGamePacks, setSelectedGamePacks] = useState([]);
   const token = localStorage.getItem('token');
 
-
   // near the top of Admin.jsx, after your useState declarations
-useEffect(() => {
-  if (isSmile) {
-    setGameForm(f => ({ ...f, region: 'BR' }));
-  }
-}, [isSmile]);
-
-
+  useEffect(() => {
+    if (isSmile) {
+      setGameForm(f => ({ ...f, region: 'BR' }));
+    }
+  }, [isSmile]);
 
   useEffect(() => {
     if (user?.role === 'admin') {
       fetchGames();
+      fetchBalances();
     }
   }, [user]);
 
   useEffect(() => {
     if (gameForm.apiProvider === 'smile.one' && gameForm.apiGameId) {
       fetchApiServers();
-      fetchApiPacks();
+      // Only fetch packs if we're editing an existing game
+      if (editingGame) {
+        fetchApiPacks();
+      }
     }
-  }, [gameForm.apiGameId, gameForm.apiProvider]);
+  }, [gameForm.apiGameId, gameForm.apiProvider, editingGame]);
 
   useEffect(() => {
-  // if not Smile.one or no gameId, clear and bail
-  if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId) {
-    setAvailablePacks([]);
-    return;
-  }
+    // if not Smile.one or no gameId, clear and bail
+    if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId || !editingGame) {
+      setAvailablePacks([]);
+      return;
+    }
 
-  (async () => {
+    (async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/games/api-packs/${gameForm.apiGameId}`,
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        const ct = res.headers.get('content-type') || '';
+        if (!res.ok || !ct.includes('application/json')) {
+          console.error('Pack-fetch failed:', await res.text());
+          setAvailablePacks([]);
+          return;
+        }
+        const json = await res.json();
+        setAvailablePacks(json.packs || []);
+      } catch (err) {
+        console.error('Error fetching packs:', err);
+        setAvailablePacks([]);
+      }
+    })();
+  }, [gameForm.apiProvider, gameForm.apiGameId, token, editingGame]);
+
+  const fetchBalances = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/balances`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || !ct.includes('application/json')) {
+        console.error('fetchBalances failed:', await res.text());
+        return;
+      }
+      const data = await res.json();
+      if (data.success) {
+        setBalances(data.balances);
+      }
+    } catch (err) {
+      console.error('Error fetching balances:', err);
+    }
+  };
+
+    // Add balance fetching
+  useEffect(() => {
+    const fetchBalances = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/balances`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+          setBalances(data.balances);
+        }
+      } catch (error) {
+        console.error('Failed to fetch balances:', error);
+      }
+    };
+
+    fetchBalances();
+  }, [API_BASE, token]);
+
+  const fetchGames = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/games`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || !ct.includes('application/json')) {
+        console.error('fetchGames failed:', await res.text());
+        setError('Failed to fetch games');
+        return;
+      }
+      const data = await res.json();
+      if (data.success) {
+        setGames(data.games || []);
+      } else {
+        setError(data.message || 'Failed to fetch games');
+      }
+    } catch (err) {
+      console.error('Error fetching games:', err);
+      setError('Error fetching games');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchApiServers = async () => {
+    if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId) {
+      setServerList([]);
+      return;
+    }
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/games/api-packs/${gameForm.apiGameId}`,
+        `${import.meta.env.VITE_API_URL}/games/api-servers/${gameForm.apiGameId}`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
       const ct = res.headers.get('content-type') || '';
       if (!res.ok || !ct.includes('application/json')) {
-        console.error('Pack-fetch failed:', await res.text());
-        setAvailablePacks([]);
+        console.error('Server-fetch failed:', await res.text());
+        setServerList([]);
         return;
       }
       const json = await res.json();
-      setAvailablePacks(json.packs || []);
+      setServerList(json.servers || []);
+    } catch (err) {
+      console.error('Error fetching servers:', err);
+      setServerList([]);
+    }
+  };
+
+  const fetchApiPacks = async () => {
+    try {
+      const url = `${API_BASE}/games/api-packs/${gameForm.apiGameId}`;
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || !ct.includes('application/json')) {
+        console.error('fetchApiPacks failed:', await res.text());
+        setAvailablePacks([]);
+        return;
+      }
+      const data = await res.json();
+      if (data.success) {
+        setAvailablePacks(data.packs || []);
+      } else {
+        setAvailablePacks([]);
+      }
     } catch (err) {
       console.error('Error fetching packs:', err);
       setAvailablePacks([]);
     }
-  })();
-}, [gameForm.apiProvider, gameForm.apiGameId, token]);
-
-
-
- const fetchGames = async () => {
-  try {
-    setLoading(true);
-    const res = await fetch(`${API_BASE}/games`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    });
-    const ct = res.headers.get('content-type') || '';
-    if (!res.ok || !ct.includes('application/json')) {
-      console.error('fetchGames failed:', await res.text());
-      setError('Failed to fetch games');
-      return;
-    }
-    const data = await res.json();
-    if (data.success) {
-      setGames(data.games || []);
-    } else {
-      setError(data.message || 'Failed to fetch games');
-    }
-  } catch (err) {
-    console.error('Error fetching games:', err);
-    setError('Error fetching games');
-  } finally {
-    setLoading(false);
-  }
-};
-
- const fetchApiServers = async () => {
-  if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId) {
-    setServerList([]);
-    return;
-  }
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/games/api-servers/${gameForm.apiGameId}`,
-      { headers: { 'Authorization': `Bearer ${token}` } }
-    );
-    const ct = res.headers.get('content-type') || '';
-    if (!res.ok || !ct.includes('application/json')) {
-      console.error('Server-fetch failed:', await res.text());
-      setServerList([]);
-      return;
-    }
-    const json = await res.json();
-    setServerList(json.servers || []);
-  } catch (err) {
-    console.error('Error fetching servers:', err);
-    setServerList([]);
-  }
-};
-
-
-  const fetchApiPacks = async () => {
-  try {
-    const url = `${API_BASE}/games/api-packs/${gameForm.apiGameId}`;
-    const res = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    });
-    const ct = res.headers.get('content-type') || '';
-    if (!res.ok || !ct.includes('application/json')) {
-      console.error('fetchApiPacks failed:', await res.text());
-      setAvailablePacks([]);
-      return;
-    }
-    const data = await res.json();
-    if (data.success) {
-      setAvailablePacks(data.packs || []);
-    } else {
-      setAvailablePacks([]);
-    }
-  } catch (err) {
-    console.error('Error fetching packs:', err);
-    setAvailablePacks([]);
-  }
-};
-
+  };
 
   const clearMessages = () => {
     setError('');
@@ -188,7 +234,21 @@ useEffect(() => {
     setSelectedGamePacks([]);
     setServerList([]);
     setAvailablePacks([]);
+    resetPackForm();
   };
+
+  // const resetPackForm = () => {
+  //   setPackForm({
+  //     packId: '',
+  //     name: '',
+  //     description: '',
+  //     amount: '',
+  //     retailPrice: '',
+  //     resellerPrice: '',
+  //     costPrice: ''
+  //   });
+  //   setEditingPack(null);
+  // };
 
   const handleGameSubmit = async (e) => {
     e.preventDefault();
@@ -209,7 +269,7 @@ useEffect(() => {
         return;
       }
 
-      const url = editingGame ? `${API_BASE}/games/${editingGame._id}` : '/games';
+      const url = editingGame ? `${API_BASE}/games/${editingGame._id}` : `${API_BASE}/games`;
       const method = editingGame ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -272,35 +332,76 @@ useEffect(() => {
     }
   };
 
-  const handleAddPackManually = () => {
-    if (!packForm.packId || !packForm.name || !packForm.amount || 
-        !packForm.retailPrice || !packForm.resellerPrice || !packForm.costPrice) {
-      setError('Please fill all pack fields');
-      return;
-    }
+ const handleAddPackManually = async () => {
+  if (!packForm.packId || !packForm.name || !packForm.amount || 
+      !packForm.retailPrice || !packForm.resellerPrice || !packForm.costPrice) {
+    setError('Please fill all pack fields');
+    return;
+  }
 
+  if (editingPack) {
+    const success = await handleUpdatePack(packForm);
+    if (success) {
+      const updatedPacks = [...selectedGamePacks];
+      const packIndex = selectedGamePacks.findIndex(p => p.packId === editingPack.packId);
+      if (packIndex !== -1) {
+        updatedPacks[packIndex] = packForm;
+        setSelectedGamePacks(updatedPacks);
+      }
+    }
+  } else {
     // Check if pack already exists
     const exists = selectedGamePacks.some(p => p.packId === packForm.packId);
     if (exists) {
       setError('Pack ID already exists');
       return;
     }
-
     setSelectedGamePacks([...selectedGamePacks, { ...packForm }]);
-    setPackForm({
-      packId: '',
-      name: '',
-      description: '',
-      amount: '',
-      retailPrice: '',
-      resellerPrice: '',
-      costPrice: ''
-    });
-    clearMessages();
+  }
+
+  resetPackForm();
+  clearMessages();
+};
+
+
+  // const handleEditPack = (index) => {
+  //   const pack = selectedGamePacks[index];
+  //   setPackForm({ ...pack });
+  //   setEditingPack(index);
+  // };
+
+  const handleUpdatePackInGame = async (gameId, packId, updatedPack) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE}/games/${gameId}/packs/${packId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updatedPack)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setSuccess('Pack updated successfully!');
+        fetchGames();
+      } else {
+        setError(data.message || 'Failed to update pack');
+      }
+    } catch (error) {
+      console.error('Error updating pack:', error);
+      setError('Error updating pack');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemovePack = (index) => {
     setSelectedGamePacks(selectedGamePacks.filter((_, i) => i !== index));
+    if (editingPack === index) {
+      resetPackForm();
+    }
   };
 
   const handleEditGame = (game) => {
@@ -324,7 +425,7 @@ useEffect(() => {
 
     try {
       setLoading(true);
-      const response = await fetch(`/games/${gameId}`, {
+      const response = await fetch(`${API_BASE}/games/${gameId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -363,6 +464,41 @@ useEffect(() => {
         <div className="mb-4">
           <h1 className="display-5 fw-bold">Admin Panel</h1>
         </div>
+
+        {/* Balance Display */}
+        {balances && (
+          <div className="row mb-4">
+            <div className="col-12">
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="card-title mb-0">API Balances</h5>
+                </div>
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-4">
+                      <div className="text-center p-3 border rounded">
+                        <h6 className="text-muted">Smile.one</h6>
+                        <h4 className="text-primary">${balances.smileone || '0.00'}</h4>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="text-center p-3 border rounded">
+                        <h6 className="text-muted">Yokcash</h6>
+                        <h4 className="text-success">${balances.yokcash || '0.00'}</h4>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="text-center p-3 border rounded">
+                        <h6 className="text-muted">Hopestore</h6>
+                        <h4 className="text-warning">${balances.hopestore || '0.00'}</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Alert Messages */}
         {error && (
@@ -406,6 +542,7 @@ useEffect(() => {
                     resetGameForm();
                     setEditingGame(null);
                     clearMessages();
+                    resetPackForm();
                   }}
                   disabled={loading}
                   className="btn btn-primary"
@@ -557,34 +694,33 @@ useEffect(() => {
                         </div>
 
                         <div className="col-md-6">
-  <label className="form-label">Region (Server) *</label>
-  {isSmile ? (
-    <select className="form-select" value="BR" disabled>
-      <option value="BR">Brazil</option>
-    </select>
-  ) : (
-    <select
-      className="form-select"
-      value={gameForm.region}
-      onChange={e =>
-        setGameForm({ ...gameForm, region: e.target.value })
-      }
-      required
-    >
-      <option value="">Select server</option>
-      {serverList.length > 0
-        ? serverList.map(s => (
-            <option key={s.server_id} value={s.server_id}>
-              {s.server_name}
-            </option>
-          ))
-        : (
-            <option value="0">Global</option>
-          )}
-    </select>
-  )}
-</div>
-
+                          <label className="form-label">Region (Server) *</label>
+                          {isSmile ? (
+                            <select className="form-select" value="BR" disabled>
+                              <option value="BR">Brazil</option>
+                            </select>
+                          ) : (
+                            <select
+                              className="form-select"
+                              value={gameForm.region}
+                              onChange={e =>
+                                setGameForm({ ...gameForm, region: e.target.value })
+                              }
+                              required
+                            >
+                              <option value="">Select server</option>
+                              {serverList.length > 0
+                                ? serverList.map(s => (
+                                    <option key={s.server_id} value={s.server_id}>
+                                      {s.server_name}
+                                    </option>
+                                  ))
+                                : (
+                                    <option value="0">Global</option>
+                                  )}
+                            </select>
+                          )}
+                        </div>
 
                         <div className="col-md-6">
                           <label className="form-label">Category</label>
@@ -626,19 +762,22 @@ useEffect(() => {
                       <div className="border-top pt-4 mt-4">
                         <h5 className="mb-3">Game Packs</h5>
                         
-                        {/* Add Pack from API */}
-                        {gameForm.apiProvider === 'smile.one' && availablePacks.length > 0 && (
+                        {/* Add Pack from API - Only show for Smile.one when editing existing game */}
+                        {gameForm.apiProvider === 'smile.one' && editingGame && availablePacks.length > 0 && (
                           <div className="card mb-3">
                             <div className="card-body">
-                              <h6 className="card-title">Add Pack from API</h6>
+                              <h6 className="card-title">Add Pack from Smile.one API</h6>
                               <select
                                 className="form-select"
                                 onChange={handleAddPackFromApi}
+                                defaultValue=""
                               >
-                                <option value="">Choose a pack to add</option>
-                                {availablePacks.map(p => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.spu} — ₹{p.price}
+                                <option value="" disabled>
+                                  Select a pack from Smile.one
+                                </option>
+                                {availablePacks.map(pack => (
+                                  <option key={pack.id} value={pack.id}>
+                                    {pack.spu} — ${pack.price}
                                   </option>
                                 ))}
                               </select>
@@ -646,29 +785,25 @@ useEffect(() => {
                           </div>
                         )}
 
-                        {/* Manual Pack Entry */}
+                        {/* Manual Pack Entry - Always show for all providers */}
                         <div className="card mb-3">
                           <div className="card-body">
-                            <h6 className="card-title">Add Pack Manually</h6>
+                            <h6 className="card-title">
+                              {editingPack !== null ? 'Edit Pack' : 'Add Pack Manually'}
+                            </h6>
                             <div className="row g-2">
                               <div className="col-md-2">
-  <label className="form-label">Smile.one Pack</label>
-  <select
-    className="form-select"
-    onChange={handleAddPackFromApi}
-    defaultValue=""
-  >
-    <option value="" disabled>
-      Select a pack
-    </option>
-    {availablePacks.map(pack => (
-      <option key={pack.id} value={pack.id}>
-        {pack.spu} — ${pack.price}
-      </option>
-    ))}
-  </select>
-</div>
+                                <label className="form-label">Pack ID</label>
+                                <input
+                                  type="text"
+                                  className="form-control form-control-sm"
+                                  placeholder="Pack ID"
+                                  value={packForm.packId}
+                                  onChange={(e) => setPackForm({...packForm, packId: e.target.value})}
+                                />
+                              </div>
                               <div className="col-md-2">
+                                <label className="form-label">Pack Name</label>
                                 <input
                                   type="text"
                                   className="form-control form-control-sm"
@@ -678,6 +813,7 @@ useEffect(() => {
                                 />
                               </div>
                               <div className="col-md-2">
+                                <label className="form-label">Amount</label>
                                 <input
                                   type="number"
                                   className="form-control form-control-sm"
@@ -687,8 +823,10 @@ useEffect(() => {
                                 />
                               </div>
                               <div className="col-md-2">
+                                <label className="form-label">Retail Price</label>
                                 <input
                                   type="number"
+                                  step="0.01"
                                   className="form-control form-control-sm"
                                   placeholder="Retail Price"
                                   value={packForm.retailPrice}
@@ -696,8 +834,10 @@ useEffect(() => {
                                 />
                               </div>
                               <div className="col-md-2">
+                                <label className="form-label">Reseller Price</label>
                                 <input
                                   type="number"
+                                  step="0.01"
                                   className="form-control form-control-sm"
                                   placeholder="Reseller Price"
                                   value={packForm.resellerPrice}
@@ -705,8 +845,10 @@ useEffect(() => {
                                 />
                               </div>
                               <div className="col-md-2">
+                                <label className="form-label">Cost Price</label>
                                 <input
                                   type="number"
+                                  step="0.01"
                                   className="form-control form-control-sm"
                                   placeholder="Cost Price"
                                   value={packForm.costPrice}
@@ -714,13 +856,24 @@ useEffect(() => {
                                 />
                               </div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={handleAddPackManually}
-                              className="btn btn-success btn-sm mt-3"
-                            >
-                              Add Pack
-                            </button>
+                            <div className="mt-3">
+                              <button
+                                type="button"
+                                onClick={handleAddPackManually}
+                                className={`btn btn-sm ${editingPack !== null ? 'btn-primary' : 'btn-success'}`}
+                              >
+                                {editingPack !== null ? 'Update Pack' : 'Add Pack'}
+                              </button>
+                              {editingPack !== null && (
+                                <button
+                                  type="button"
+                                  onClick={resetPackForm}
+                                  className="btn btn-sm btn-secondary ms-2"
+                                >
+                                  Cancel Edit
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -740,30 +893,68 @@ useEffect(() => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {selectedGamePacks.map((pack, index) => (
-                                  <tr key={index}>
-                                    <td>{pack.packId}</td>
-                                    <td>{pack.name}</td>
-                                    <td>{pack.amount}</td>
-                                    <td>₹{pack.costPrice}</td>
-                                    <td>₹{pack.retailPrice}</td>
-                                    <td>₹{pack.resellerPrice}</td>
-                                    <td>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRemovePack(index)}
-                                        className="btn btn-sm btn-outline-danger"
-                                      >
-                                        Remove
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))}
+                               {selectedGamePacks.map((pack, index) => (
+  <tr key={index}>
+    <td>{pack.packId}</td>
+    <td>{pack.name}</td>
+    <td>{pack.amount}</td>
+    <td>₹{pack.costPrice}</td>
+    <td>₹{pack.retailPrice}</td>
+    <td>₹{pack.resellerPrice}</td>
+    <td>
+      <button
+        type="button"
+        onClick={() => handleEditPack(pack)} // Use the hook's handleEditPack
+        className="btn btn-sm btn-outline-primary me-2"
+      >
+        Edit
+      </button>
+      <button
+        type="button"
+        onClick={() => handleRemovePack(index)}
+        className="btn btn-sm btn-outline-danger"
+      >
+        Remove
+      </button>
+    </td>
+  </tr>
+))}
                               </tbody>
                             </table>
                           </div>
                         )}
                       </div>
+
+                        {/* Updated Balances Section */}
+    {balances && (
+      <div className="card mt-4">
+        <div className="card-header">
+          <h5 className="card-title mb-0">Provider Balances</h5>
+        </div>
+        <div className="card-body">
+          <div className="row">
+            <div className="col-md-4">
+              <div className="text-center p-3 border rounded">
+                <h6 className="text-muted">Yokcash</h6>
+                <h4 className="text-success">₹{balances.yokcash?.data || '0.00'}</h4>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="text-center p-3 border rounded">
+                <h6 className="text-muted">Hopestore</h6>
+                <h4 className="text-warning">₹{balances.hopestore?.data || '0.00'}</h4>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="text-center p-3 border rounded">
+                <h6 className="text-muted">Smile.one</h6>
+                <h4 className="text-primary">{balances.smileone?.smile_points || '0'} points</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
                     </form>
                   </div>
                   <div className="modal-footer">
@@ -774,6 +965,7 @@ useEffect(() => {
                         setShowGameForm(false);
                         setEditingGame(null);
                         resetGameForm();
+                        resetPackForm();
                         clearMessages();
                       }}
                     >
@@ -842,6 +1034,9 @@ useEffect(() => {
             </div>
           </div>
         )}
+
+    
+
       </div>
     </div>
   );
