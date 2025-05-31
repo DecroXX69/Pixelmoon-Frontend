@@ -2,29 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './admin.module.css';
 import { usePackManagement } from '../../../hooks/usePackManagement';
+
 const AdminPanel = () => {
   const { user } = useAuth();
+  const API_BASE = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem('token');
   const [activeTab, setActiveTab] = useState('games');
-  const [games, setGames] = useState([]);
   const [showGameForm, setShowGameForm] = useState(false);
-  const [editingGame, setEditingGame] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // 1) Core data states
+  const [games, setGames] = useState([]);
+  const [balances, setBalances] = useState(null);
   const [serverList, setServerList] = useState([]);
   const [availablePacks, setAvailablePacks] = useState([]);
+  const [selectedGamePacks, setSelectedGamePacks] = useState([]);
+  const [editingGame, setEditingGame] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [balances, setBalances] = useState(null);
-  // const [editingPack, setEditingPack] = useState(null);
-  const API_BASE = import.meta.env.VITE_API_URL;
-  const {
-    editingPack,
-    packForm,
-    setPackForm,
-    handleEditPack,
-    handleUpdatePack,
-    resetPackForm
-  } = usePackManagement(editingGame?._id);
-  // Game form state
+
+  // 2) Game form, including provider, game ID, etc.
   const [gameForm, setGameForm] = useState({
     name: '',
     description: '',
@@ -34,31 +30,30 @@ const AdminPanel = () => {
     region: '',
     category: 'Mobile Games'
   });
-
-  // at the top of your Admin.jsx component, after you declare gameForm:
   const isSmile = gameForm.apiProvider === 'smile.one';
 
-  // Pack form state for manual entry
-  // const [packForm, setPackForm] = useState({
-  //   packId: '',
-  //   name: '',
-  //   description: '',
-  //   amount: '',
-  //   retailPrice: '',
-  //   resellerPrice: '',
-  //   costPrice: ''
-  // });
+  // 3) Hook for pack editing (only relevant when editing an existing game)
+  const {
+    editingPack,
+    packForm,
+    setPackForm,
+    handleEditPack,
+    handleUpdatePack,
+    resetPackForm
+  } = usePackManagement(editingGame?._id);
 
-  const [selectedGamePacks, setSelectedGamePacks] = useState([]);
-  const token = localStorage.getItem('token');
+  // ───────────────────────────────────────────────────────────────────────────
+  // EFFECTS
+  // ───────────────────────────────────────────────────────────────────────────
 
-  // near the top of Admin.jsx, after your useState declarations
+  // A) When apiProvider switches to "smile.one", force region = "BR"
   useEffect(() => {
     if (isSmile) {
       setGameForm(f => ({ ...f, region: 'BR' }));
     }
   }, [isSmile]);
 
+  // B) On first load (and whenever user changes), fetch list of games and balances
   useEffect(() => {
     if (user?.role === 'admin') {
       fetchGames();
@@ -66,48 +61,39 @@ const AdminPanel = () => {
     }
   }, [user]);
 
+  // C) Whenever provider, game ID, or editingGame changes, load servers/packs/products
   useEffect(() => {
-    if (gameForm.apiProvider === 'smile.one' && gameForm.apiGameId) {
+    const provider = gameForm.apiProvider;
+    const gameId   = gameForm.apiGameId?.trim();
+
+    if (provider === 'smile.one' && gameId) {
       fetchApiServers();
-      // Only fetch packs if we're editing an existing game
       if (editingGame) {
         fetchApiPacks();
-      }
-    }
-  }, [gameForm.apiGameId, gameForm.apiProvider, editingGame]);
-
-  useEffect(() => {
-    // if not Smile.one or no gameId, clear and bail
-    if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId || !editingGame) {
-      setAvailablePacks([]);
-      return;
-    }
-
-    (async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/games/api-packs/${gameForm.apiGameId}`,
-          { headers: { 'Authorization': `Bearer ${token}` } }
-        );
-        const ct = res.headers.get('content-type') || '';
-        if (!res.ok || !ct.includes('application/json')) {
-          console.error('Pack-fetch failed:', await res.text());
-          setAvailablePacks([]);
-          return;
-        }
-        const json = await res.json();
-        setAvailablePacks(json.packs || []);
-      } catch (err) {
-        console.error('Error fetching packs:', err);
+      } else {
         setAvailablePacks([]);
       }
-    })();
-  }, [gameForm.apiProvider, gameForm.apiGameId, token, editingGame]);
+    }
+    else if (provider === 'hopestore' || provider === 'yokcash') {
+      // On creation or edit, always fetch provider’s products
+      fetchApiProducts(provider);
+      setServerList([]); 
+    }
+    else {
+      setServerList([]);
+      setAvailablePacks([]);
+    }
+  }, [gameForm.apiProvider, gameForm.apiGameId, editingGame]);
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // FETCH FUNCTIONS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  // 1) Fetch balances endpoint (aggregate of 3 providers)
   const fetchBalances = async () => {
     try {
       const res = await fetch(`${API_BASE}/balances`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       const ct = res.headers.get('content-type') || '';
       if (!res.ok || !ct.includes('application/json')) {
@@ -123,30 +109,12 @@ const AdminPanel = () => {
     }
   };
 
-    // Add balance fetching
-  useEffect(() => {
-    const fetchBalances = async () => {
-      try {
-        const response = await fetch(`${API_BASE}/balances`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await response.json();
-        if (data.success) {
-          setBalances(data.balances);
-        }
-      } catch (error) {
-        console.error('Failed to fetch balances:', error);
-      }
-    };
-
-    fetchBalances();
-  }, [API_BASE, token]);
-
+  // 2) Fetch all games
   const fetchGames = async () => {
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE}/games`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       const ct = res.headers.get('content-type') || '';
       if (!res.ok || !ct.includes('application/json')) {
@@ -168,15 +136,16 @@ const AdminPanel = () => {
     }
   };
 
+  // 3) Fetch Smile.one servers for a given game ID
   const fetchApiServers = async () => {
-    if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId) {
+    if (gameForm.apiProvider !== 'smile.one' || !gameForm.apiGameId?.trim()) {
       setServerList([]);
       return;
     }
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/games/api-servers/${gameForm.apiGameId}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
+        `${API_BASE}/games/api-servers/${gameForm.apiGameId.trim()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       const ct = res.headers.get('content-type') || '';
       if (!res.ok || !ct.includes('application/json')) {
@@ -192,11 +161,12 @@ const AdminPanel = () => {
     }
   };
 
-  const fetchApiPacks = async () => {
+  // 4) Fetch Smile.one packs for a given game ID (only in edit mode)
+   const fetchApiPacks = async () => {
     try {
       const url = `${API_BASE}/games/api-packs/${gameForm.apiGameId}`;
       const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const ct = res.headers.get('content-type') || '';
       if (!res.ok || !ct.includes('application/json')) {
@@ -206,7 +176,14 @@ const AdminPanel = () => {
       }
       const data = await res.json();
       if (data.success) {
-        setAvailablePacks(data.packs || []);
+        // Normalize Smile.one packs: data.packs = [ { id, spu, price }, … ]
+        const normalized = (data.packs || []).map((item, idx) => ({
+          id:    item.id,
+          name:  item.spu,            // “78+8 Diamonds”
+          price: item.price,  // convert to number
+          raw:   item
+        }));
+        setAvailablePacks(normalized);
       } else {
         setAvailablePacks([]);
       }
@@ -215,12 +192,63 @@ const AdminPanel = () => {
       setAvailablePacks([]);
     }
   };
+  // 5) Fetch Hopestore or Yokcash products (normalized)
+   const fetchApiProducts = async (provider) => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/games/api-products/${provider}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      const data = await response.json();
 
+      if (!data.success || !data.products) {
+        setAvailablePacks([]);
+        return;
+      }
+
+      let normalized = [];
+      // Hopestore shape: { success:true, products:{ data:[ { id, nama_layanan, harga, … }, … ] } }
+      if (
+        provider === 'hopestore' &&
+        Array.isArray(data.products.data)
+      ) {
+        normalized = data.products.data.map((item, idx) => ({
+          id:    item.id,
+          name:  item.nama_layanan,
+          price: item.harga,
+          raw:   item
+        }));
+      }
+      // Yokcash shape: { success:true, products:{ data:[ { id, nama_layanan, harga, … }, … ] } }
+      else if (
+        provider === 'yokcash' &&
+        Array.isArray(data.products.data)
+      ) {
+        normalized = data.products.data.map((item, idx) => ({
+          id:    item.id,
+          name:  item.nama_layanan,
+          price: item.harga,
+          raw:   item
+        }));
+      }
+      setAvailablePacks(normalized);
+    } catch (error) {
+      console.error(`Error fetching API products for ${provider}:`, error);
+      setAvailablePacks([]);
+    }
+  };
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // HANDLERS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  // A) Clear error and success messages
   const clearMessages = () => {
     setError('');
     setSuccess('');
   };
 
+  // B) Reset game form entirely (for Add New Game or after save)
   const resetGameForm = () => {
     setGameForm({
       name: '',
@@ -237,210 +265,167 @@ const AdminPanel = () => {
     resetPackForm();
   };
 
-  // const resetPackForm = () => {
-  //   setPackForm({
-  //     packId: '',
-  //     name: '',
-  //     description: '',
-  //     amount: '',
-  //     retailPrice: '',
-  //     resellerPrice: '',
-  //     costPrice: ''
-  //   });
-  //   setEditingPack(null);
-  // };
-
+  // C) Submit (create or update) a game
   const handleGameSubmit = async (e) => {
     e.preventDefault();
     clearMessages();
-    
     try {
       setLoading(true);
-      
-      // Validate form
-      if (!gameForm.name || !gameForm.description || !gameForm.image || 
-          !gameForm.apiGameId || !gameForm.region) {
+      // 1) Validate required fields
+      if (!gameForm.name.trim() ||
+          !gameForm.description.trim() ||
+          !gameForm.image.trim() ||
+          !gameForm.apiGameId.trim() ||
+          !gameForm.region.trim()
+      ) {
         setError('Please fill all required fields');
         return;
       }
-
+      // 2) Must have at least one pack
       if (selectedGamePacks.length === 0) {
         setError('Please add at least one pack to the game');
         return;
       }
-
-      const url = editingGame ? `${API_BASE}/games/${editingGame._id}` : `${API_BASE}/games`;
+      // 3) Choose correct URL/method
+      const url = editingGame
+        ? `${API_BASE}/games/${editingGame._id}`
+        : `${API_BASE}/games`;
       const method = editingGame ? 'PUT' : 'POST';
 
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           ...gameForm,
           packs: selectedGamePacks
         })
       });
-
-      const data = await response.json();
-
-      if (data.success) {
+      const json = await res.json();
+      if (json.success) {
         setSuccess(editingGame ? 'Game updated successfully!' : 'Game created successfully!');
         setShowGameForm(false);
         setEditingGame(null);
         resetGameForm();
         fetchGames();
       } else {
-        setError(data.message || 'Failed to save game');
+        setError(json.message || 'Failed to save game');
       }
-    } catch (error) {
-      console.error('Error saving game:', error);
+    } catch (err) {
+      console.error('Error saving game:', err);
       setError('Error saving game. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // D) Add a pack from the API‐populated dropdown
   const handleAddPackFromApi = (e) => {
     const packId = e.target.value;
     if (!packId) return;
 
     const pack = availablePacks.find(p => p.id === packId);
-    if (pack) {
-      // Check if pack already exists
-      const exists = selectedGamePacks.some(p => p.packId === pack.id);
-      if (exists) {
-        setError('Pack already added');
-        return;
-      }
+    if (!pack) return;
 
-      const newPack = {
-        packId: pack.id,
-        name: pack.spu || pack.name,
-        description: pack.description || '',
-        amount: parseFloat(pack.price) || 0,
-        retailPrice: parseFloat(pack.price) || 0,
-        resellerPrice: parseFloat(pack.price) * 0.95 || 0, // 5% discount for resellers
-        costPrice: parseFloat(pack.price) * 0.90 || 0 // 10% cost price
-      };
-
-      setSelectedGamePacks([...selectedGamePacks, newPack]);
-      e.target.value = ''; // Reset dropdown
-      clearMessages();
-    }
-  };
-
- const handleAddPackManually = async () => {
-  if (!packForm.packId || !packForm.name || !packForm.amount || 
-      !packForm.retailPrice || !packForm.resellerPrice || !packForm.costPrice) {
-    setError('Please fill all pack fields');
-    return;
-  }
-
-  if (editingPack) {
-    const success = await handleUpdatePack(packForm);
-    if (success) {
-      const updatedPacks = [...selectedGamePacks];
-      const packIndex = selectedGamePacks.findIndex(p => p.packId === editingPack.packId);
-      if (packIndex !== -1) {
-        updatedPacks[packIndex] = packForm;
-        setSelectedGamePacks(updatedPacks);
-      }
-    }
-  } else {
-    // Check if pack already exists
-    const exists = selectedGamePacks.some(p => p.packId === packForm.packId);
-    if (exists) {
-      setError('Pack ID already exists');
+    if (selectedGamePacks.some(p => p.packId === pack.id)) {
+      setError('Pack already added');
       return;
     }
-    setSelectedGamePacks([...selectedGamePacks, { ...packForm }]);
-  }
 
-  resetPackForm();
-  clearMessages();
-};
+    const newPack = {
+      packId: pack.id,
+      name:   pack.name,
+      description: pack.raw?.spu || pack.raw?.nama_layanan || '',
+      amount: parseFloat(pack.price) || 0,
+      retailPrice:  parseFloat(pack.price) || 0,
+      resellerPrice: parseFloat(pack.price) * 0.95 || 0,
+      costPrice:     parseFloat(pack.price) * 0.90 || 0
+    };
 
-
-  // const handleEditPack = (index) => {
-  //   const pack = selectedGamePacks[index];
-  //   setPackForm({ ...pack });
-  //   setEditingPack(index);
-  // };
-
-  const handleUpdatePackInGame = async (gameId, packId, updatedPack) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/games/${gameId}/packs/${packId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(updatedPack)
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setSuccess('Pack updated successfully!');
-        fetchGames();
-      } else {
-        setError(data.message || 'Failed to update pack');
-      }
-    } catch (error) {
-      console.error('Error updating pack:', error);
-      setError('Error updating pack');
-    } finally {
-      setLoading(false);
+    setSelectedGamePacks([...selectedGamePacks, newPack]);
+    e.target.value = '';
+    clearMessages();
+  };
+  // E) Manually add or update a pack in the selectedGamePacks array
+  const handleAddPackManually = async () => {
+    if (!packForm.packId.trim() ||
+        !packForm.name.trim() ||
+        !packForm.amount ||
+        !packForm.retailPrice ||
+        !packForm.resellerPrice ||
+        !packForm.costPrice
+    ) {
+      setError('Please fill all pack fields');
+      return;
     }
+
+    if (editingPack) {
+      const ok = await handleUpdatePack();
+      if (ok) {
+        const updated = [...selectedGamePacks];
+        const idx = selectedGamePacks.findIndex(p => p.packId === editingPack.packId);
+        if (idx > -1) {
+          updated[idx] = { ...packForm };
+          setSelectedGamePacks(updated);
+        }
+      }
+    } else {
+      const exists = selectedGamePacks.some(p => p.packId === packForm.packId);
+      if (exists) {
+        setError('Pack ID already exists');
+        return;
+      }
+      setSelectedGamePacks(prev => [...prev, { ...packForm }]);
+    }
+    resetPackForm();
+    clearMessages();
   };
 
+  // F) Remove a pack from selectedGamePacks
   const handleRemovePack = (index) => {
-    setSelectedGamePacks(selectedGamePacks.filter((_, i) => i !== index));
-    if (editingPack === index) {
+    setSelectedGamePacks(prev => prev.filter((_, i) => i !== index));
+    if (editingPack && selectedGamePacks[index]?.packId === editingPack.packId) {
       resetPackForm();
     }
   };
 
+  // G) Populate form for editing an existing game
   const handleEditGame = (game) => {
     setEditingGame(game);
     setGameForm({
-      name: game.name,
+      name:        game.name,
       description: game.description,
-      image: game.image,
+      image:       game.image,
       apiProvider: game.apiProvider,
-      apiGameId: game.apiGameId,
-      region: game.region,
-      category: game.category
+      apiGameId:   game.apiGameId,
+      region:      game.region,
+      category:    game.category
     });
     setSelectedGamePacks(game.packs || []);
     setShowGameForm(true);
     clearMessages();
   };
 
+  // H) Delete a game
   const handleDeleteGame = async (gameId) => {
     if (!window.confirm('Are you sure you want to delete this game?')) return;
-
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/games/${gameId}`, {
+      const res = await fetch(`${API_BASE}/games/${gameId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-
-      const data = await response.json();
-      if (data.success) {
+      const json = await res.json();
+      if (json.success) {
         setSuccess('Game deleted successfully!');
         fetchGames();
       } else {
-        setError(data.message || 'Failed to delete game');
+        setError(json.message || 'Failed to delete game');
       }
-    } catch (error) {
-      console.error('Error deleting game:', error);
+    } catch (err) {
+      console.error('Error deleting game:', err);
       setError('Error deleting game');
     } finally {
       setLoading(false);
@@ -763,27 +748,39 @@ const AdminPanel = () => {
                         <h5 className="mb-3">Game Packs</h5>
                         
                         {/* Add Pack from API - Only show for Smile.one when editing existing game */}
-                        {gameForm.apiProvider === 'smile.one' && editingGame && availablePacks.length > 0 && (
-                          <div className="card mb-3">
-                            <div className="card-body">
-                              <h6 className="card-title">Add Pack from Smile.one API</h6>
-                              <select
-                                className="form-select"
-                                onChange={handleAddPackFromApi}
-                                defaultValue=""
-                              >
-                                <option value="" disabled>
-                                  Select a pack from Smile.one
-                                </option>
-                                {availablePacks.map(pack => (
-                                  <option key={pack.id} value={pack.id}>
-                                    {pack.spu} — ${pack.price}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        )}
+                       
+      { (gameForm.apiProvider === 'smile.one' ||
+         gameForm.apiProvider === 'hopestore' ||
+         gameForm.apiProvider === 'yokcash') &&
+        availablePacks.length > 0 && (
+         <div className="card mb-3">
+           <div className="card-body">
+             <h6 className="card-title">
+               Add Pack from{' '}
+               {gameForm.apiProvider === 'smile.one'
+                 ? 'Smile.one'
+                 : gameForm.apiProvider === 'hopestore'
+                 ? 'Hopestore'
+                 : 'Yokcash'}{' '}
+               API
+             </h6>
+             <select
+               className="form-select"
+               onChange={handleAddPackFromApi}
+               defaultValue=""
+             >
+               <option value="" disabled>
+                 Choose a pack to add
+               </option>
+               {availablePacks.map((p, idx) => (
+                 <option key={`${p.id}-${idx}`} value={p.id}>
+                   {p.name} — ₹{p.price}
+                 </option>
+               ))}
+             </select>
+           </div>
+         </div>
+      ) }
 
                         {/* Manual Pack Entry - Always show for all providers */}
                         <div className="card mb-3">
