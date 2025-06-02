@@ -12,14 +12,15 @@ import GamesPage from './components/pages/Games/GameListing';
 import GameDisplay from './components/pages/Games/GameDisplay';
 import AdminPanel from './components/pages/Admin/Admin';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import TailwindTest from './components/pages/Admin/TailwindTest';
 // import DashboardPage from './pages/DashboardPage';
 // import GamesPage from './pages/GamesPage';
 // import BlogsPage from './pages/BlogsPage';
 // import ContactPage from './pages/ContactPage';
 // import NotFoundPage from './pages/NotFoundPage';
 // import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import './App.css';
-import './index.css';
+// import './App.css';
+import './index.css'; // Import your main CSS file
 function App() {
   return (
     <Router>

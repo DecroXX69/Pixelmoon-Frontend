@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './admin.module.css';
 import { usePackManagement } from '../../../hooks/usePackManagement';
-
+import VoucherManagement from './VoucherManagement'
 const AdminPanel = () => {
   const { user } = useAuth();
   const API_BASE = import.meta.env.VITE_API_URL;
@@ -68,6 +68,7 @@ const AdminPanel = () => {
 
     if (provider === 'smile.one' && gameId) {
       fetchApiServers();
+      fetchApiPacks();
       if (editingGame) {
         fetchApiPacks();
       } else {
@@ -144,7 +145,7 @@ const AdminPanel = () => {
     }
     try {
       const res = await fetch(
-        `${API_BASE}/games/api-servers/${gameForm.apiGameId.trim()}`,
+        `${API_BASE}/games/api-packs/${gameForm.apiGameId.trim()}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const ct = res.headers.get('content-type') || '';
@@ -350,8 +351,8 @@ const AdminPanel = () => {
   };
   // E) Manually add or update a pack in the selectedGamePacks array
   const handleAddPackManually = async () => {
-    if (!packForm.packId.trim() ||
-        !packForm.name.trim() ||
+    if (!packForm.packId ||
+        !packForm.name ||
         !packForm.amount ||
         !packForm.retailPrice ||
         !packForm.resellerPrice ||
@@ -367,7 +368,7 @@ const AdminPanel = () => {
         const updated = [...selectedGamePacks];
         const idx = selectedGamePacks.findIndex(p => p.packId === editingPack.packId);
         if (idx > -1) {
-          updated[idx] = { ...packForm };
+          updated[idx] = packForm ;
           setSelectedGamePacks(updated);
         }
       }
@@ -499,21 +500,22 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="mb-4">
-          <ul className="nav nav-tabs">
-            {['games', 'users', 'orders', 'analytics'].map((tab) => (
-              <li className="nav-item" key={tab}>
-                <button
-                  className={`nav-link text-capitalize ${activeTab === tab ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+       
+       {/* Tab Navigation */}
+<div className="mb-4">
+  <ul className="nav nav-tabs">
+    {['games', 'users', 'orders', 'voucher', 'analytics'].map((tab) => (
+      <li className="nav-item" key={tab}>
+        <button
+          className={`nav-link text-capitalize ${activeTab === tab ? 'active' : ''}`}
+          onClick={() => setActiveTab(tab)}
+        >
+          {tab}
+        </button>
+      </li>
+    ))}
+  </ul>
+</div>
 
         {/* Games Tab */}
         {activeTab === 'games' && (
@@ -1015,6 +1017,15 @@ const AdminPanel = () => {
             </div>
           </div>
         )}
+
+        {/* Voucher Tab */}
+{activeTab === 'voucher' && (
+  <div className="row">
+    <div className="col-12">
+      <VoucherManagement />
+    </div>
+  </div>
+)}
 
         {/* Analytics Tab */}
         {activeTab === 'analytics' && (

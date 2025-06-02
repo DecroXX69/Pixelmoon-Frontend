@@ -1,0 +1,72 @@
+/* src/components/Admin/VoucherManagement.module.css */
+
+/* Container background and padding */
+.voucherManagement {
+  background-color: #f8f9fa; /* light gray */
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+/* Filters: limit max width */
+.filters select,
+.filters button {
+  max-width: 180px;
+}
+
+/* Table responsiveness */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.table thead {
+  background-color: #e9ecef;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+/* Card (Create tabs) */
+.card {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Add Row button */
+.btn-outline-secondary {
+  height: 38px;
+}
+
+/* Remove-row (×) button */
+.btn-danger {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Alerts */
+.alert {
+  margin-top: 1rem;
+}
+
+/* Pagination container */
+.pagination {
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
