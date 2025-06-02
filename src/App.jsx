@@ -39,7 +39,7 @@ function App() {
                 
                 {/* Protected Routes */}
                 <Route 
-                path="/game/:gameId" 
+                path="/games/:gameId" 
                 element={
                   <ProtectedRoute>
                     <GameDisplay />

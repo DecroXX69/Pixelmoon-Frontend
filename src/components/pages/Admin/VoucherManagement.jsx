@@ -30,7 +30,7 @@ const VoucherManagement = () => {
   const [createCSVError, setCreateCSVError] = useState(null);
 
   const getAuthHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem('adminToken')}`
+    Authorization: `Bearer ${localStorage.getItem('token')}`
   });
 
   // ─── Fetch vouchers on filter change ───

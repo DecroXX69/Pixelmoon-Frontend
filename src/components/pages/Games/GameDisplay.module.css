@@ -1,0 +1,400 @@
+/* Pixelmoon Gaming Store - Advanced Styling */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Dark Theme Colors */
+  --dark-primary: #00f5ff;
+  --dark-secondary: #ff6b6b;
+  --dark-success: #00ff88;
+  --dark-warning: #ffe66d;
+  --dark-info: #4ecdc4;
+  --dark-bg-primary: #0a0a0a;
+  --dark-bg-secondary: #1a1a2e;
+  --dark-bg-tertiary: #16213e;
+  --dark-text: #ffffff;
+  --dark-text-secondary: rgba(255, 255, 255, 0.7);
+  
+  /* Light Theme Colors */
+  --light-primary: #2563eb;
+  --light-secondary: #dc2626;
+  --light-success: #059669;
+  --light-warning: #d97706;
+  --light-info: #0891b2;
+  --light-bg-primary: #f0f2ff;
+  --light-bg-secondary: #ffffff;
+  --light-bg-tertiary: #f8fafc;
+  --light-text: #000000;
+  --light-text-secondary: rgba(0, 0, 0, 0.7);
+}
+
+/* Global Animations */
+@keyframes neonPulse {
+  from {
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 15px currentColor,
+      0 0 20px currentColor;
+  }
+  to {
+    text-shadow: 
+      0 0 2px currentColor,
+      0 0 5px currentColor,
+      0 0 8px currentColor,
+      0 0 12px currentColor;
+  }
+}
+
+@keyframes glowBorder {
+  0%, 100% {
+    border-color: currentColor;
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    border-color: currentColor;
+    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes matrixRain {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* Gaming-specific CSS Classes */
+.pixelmoon-container {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.gaming-header {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: neonPulse 2s ease-in-out infinite alternate;
+}
+
+.gaming-subheader {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.neon-border {
+  border: 2px solid;
+  border-radius: 12px;
+  animation: glowBorder 3s ease-in-out infinite;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  z-index: 10;
+}
+
+.pack-card-selected {
+  animation: bounceIn 0.6s ease-out;
+}
+
+.step-indicator {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.step-indicator.active {
+  animation: neonPulse 2s ease-in-out infinite;
+}
+
+.step-indicator.completed {
+  animation: bounceIn 0.6s ease-out;
+}
+
+/* Particle Effects */
+.particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.particle-small {
+  width: 2px;
+  height: 2px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.particle-medium {
+  width: 4px;
+  height: 4px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.particle-large {
+  width: 6px;
+  height: 6px;
+  animation: float 10s ease-in-out infinite;
+}
+
+/* Loading Animations */
+.loading-spinner {
+  animation: rotate 1s linear infinite;
+}
+
+.progress-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-glow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Interactive Elements */
+.interactive-button {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.interactive-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.interactive-button:hover::before {
+  left: 100%;
+}
+
+/* Theme-specific Adjustments */
+[data-theme="dark"] .gaming-bg {
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(15, 52, 96, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(83, 58, 123, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(30, 64, 175, 0.2) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+[data-theme="light"] .gaming-bg {
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #f0f2ff 0%, #e6f3ff 50%, #dbeafe 100%);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .gaming-header {
+    font-size: 2rem;
+    letter-spacing: 1px;
+  }
+  
+  .gaming-subheader {
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+  
+  .step-indicator {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gaming-header {
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .pixelmoon-container {
+    padding: 1rem 0.5rem;
+  }
+}
+
+/* High Performance Mode */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .particle,
+  .neon-border,
+  .gaming-header,
+  .interactive-button::before {
+    display: none !important;
+  }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-contrast: high) {
+  .neon-border {
+    border-width: 3px;
+  }
+  
+  .gaming-header {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--dark-primary), var(--dark-secondary));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, var(--dark-secondary), var(--dark-primary));
+}
+
+/* Selection Styles */
+::selection {
+  background: rgba(0, 245, 255, 0.3);
+  color: white;
+}
+
+::-moz-selection {
+  background: rgba(0, 245, 255, 0.3);
+  color: white;
+}
