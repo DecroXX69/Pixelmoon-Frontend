@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import styles from './admin.module.css';
 import { usePackManagement } from '../../../hooks/usePackManagement';
 import VoucherManagement from './VoucherManagement'
+import UserManagement from './UserManagement';
 const AdminPanel = () => {
   const { user } = useAuth();
   const API_BASE = import.meta.env.VITE_API_URL;
@@ -987,20 +988,14 @@ const AdminPanel = () => {
         )}
 
         {/* Users Tab */}
-        {activeTab === 'users' && (
-          <div className="row">
-            <div className="col-12">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="h3 mb-0">User Management</h2>
-              </div>
-              <div className="card">
-                <div className="card-body">
-                  <p className="text-muted">User management features coming soon...</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+              
+{activeTab === 'users' && (
+  <div className="row">
+    <div className="col-12">
+      <UserManagement />
+    </div>
+  </div>
+)}
 
         {/* Orders Tab */}
         {activeTab === 'orders' && (

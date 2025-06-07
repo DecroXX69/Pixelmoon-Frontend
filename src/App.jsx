@@ -13,6 +13,8 @@ import GameDisplay from './components/pages/Games/GameDisplay';
 import AdminPanel from './components/pages/Admin/Admin';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import TailwindTest from './components/pages/Admin/TailwindTest';
+import Leaderboard from './components/pages/Leaderboard/Leaderboard';
+import DashboardPage from './components/pages/Dashboard/Dashboard';
 // import DashboardPage from './pages/DashboardPage';
 // import GamesPage from './pages/GamesPage';
 // import BlogsPage from './pages/BlogsPage';
@@ -46,6 +48,11 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/user-dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } />
                {/* Admin Routes */}
                <Route 
                 path="/admin" 

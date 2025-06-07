@@ -1,0 +1,236 @@
+/* Container - Light Mode (Default) */
+.container {
+  background: linear-gradient(135deg, #e53e3e 0%, #dd6b20 100%);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+/* Container - Dark Mode */
+.container.darkTheme {
+  background: linear-gradient(135deg, var(--background-color) 0%, var(--secondary-color) 100%);
+}
+
+/* Sidebar - Light Mode (Default) */
+.sidebar {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+/* Sidebar - Dark Mode */
+.darkTheme .sidebar {
+  background: var(--card-bg-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Category Button - Light Mode (Default) */
+.categoryButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+/* Category Button - Dark Mode */
+.darkTheme .categoryButton {
+  color: var(--text-color);
+}
+
+.categoryButton:hover {
+  background: #f7fafc;
+  color: #2d3748;
+}
+
+.darkTheme .categoryButton:hover {
+  background: var(--border-color);
+  color: var(--text-color);
+}
+
+.categoryButton.active {
+  background: #e53e3e;
+  color: white;
+}
+
+.darkTheme .categoryButton.active {
+  background: var(--primary-color);
+  color: var(--button-text-color);
+}
+
+.categoryButton.active .arrowIcon {
+  color: white;
+}
+
+.darkTheme .categoryButton.active .arrowIcon {
+  color: var(--button-text-color);
+}
+
+/* Arrow Icon - Light Mode (Default) */
+.arrowIcon {
+  color: #a0aec0;
+  transition: color 0.3s ease;
+}
+
+/* Arrow Icon - Dark Mode */
+.darkTheme .arrowIcon {
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+/* Main Content */
+.mainContent {
+  padding-left: 2rem;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: white;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* Game Cards - Light Mode (Default) */
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+/* Game Cards - Dark Mode */
+.darkTheme .card {
+  background: var(--card-bg-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.darkTheme .card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.gameImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .gameImage {
+  transform: scale(1.05);
+}
+
+.cardContent {
+  padding: 1.25rem;
+}
+
+/* Game Name - Light Mode (Default) */
+.gameName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Game Name - Dark Mode */
+.darkTheme .gameName {
+  color: var(--text-color);
+}
+
+/* Responsive Design */
+@media (max-width: 991.98px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .mainContent {
+    padding-left: 0;
+    margin-top: 2rem;
+  }
+  
+  .sidebar {
+    margin-bottom: 1rem;
+  }
+  
+  .sidebarContent {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .categoryButton {
+    flex: 1;
+    min-width: calc(50% - 0.25rem);
+    justify-content: center;
+  }
+  
+  .arrowIcon {
+    display: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .container {
+    padding: 0.5rem;
+  }
+  
+  .categoryButton {
+    min-width: 100%;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .gameImage {
+    height: 140px;
+  }
+  
+  .cardContent {
+    padding: 1rem;
+  }
+  
+  .gameName {
+    font-size: 0.9rem;
+  }
+}

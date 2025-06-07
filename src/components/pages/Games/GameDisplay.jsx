@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { Grid as Grid2 } from '@mui/material'; // in v6, Grid2 is stable
+
 import {
   Box,
   Container,
@@ -92,197 +94,280 @@ const floatingParticles = keyframes`
 `;
 
 // Styled Components
-const PixelmoonContainer = styled(Container)(({ theme, currentTheme }) => ({
-  minHeight: '100vh',
-  background: currentTheme === 'dark' 
-    ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)'
-    : 'linear-gradient(135deg, #f0f2ff 0%, #e6f3ff 50%, #dbeafe 100%)',
-  position: 'relative',
-  padding: '2rem 1rem',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+// 1) A root wrapper that strips out the custom prop
+const PixelmoonContainerRoot = ({ currentTheme, ...otherProps }) => {
+  return <Container {...otherProps} />;
+};
+
+// 2) Styled version uses currentTheme for styling but never forwards it to the DOM
+export const PixelmoonContainer = styled(PixelmoonContainerRoot)(
+  ({ theme, currentTheme }) => ({
+    minHeight: '100vh',
     background: currentTheme === 'dark'
-      ? `radial-gradient(circle at 20% 20%, ${alpha('#0f3460', 0.3)} 0%, transparent 50%),
-         radial-gradient(circle at 80% 80%, ${alpha('#533a7b', 0.3)} 0%, transparent 50%),
-         radial-gradient(circle at 40% 40%, ${alpha('#1e40af', 0.2)} 0%, transparent 50%)`
-      : `radial-gradient(circle at 20% 20%, ${alpha('#3b82f6', 0.1)} 0%, transparent 50%),
-         radial-gradient(circle at 80% 80%, ${alpha('#8b5cf6', 0.1)} 0%, transparent 50%)`,
-    pointerEvents: 'none',
-  }
-}));
-
-const NeonCard = styled(Card)(({ theme, currentTheme, variant = 'default' }) => {
-  const getColors = () => {
-    if (currentTheme === 'dark') {
-      switch (variant) {
-        case 'validate': return { border: '#00f5ff', glow: '#00f5ff' };
-        case 'packs': return { border: '#ff6b6b', glow: '#ff6b6b' };
-        case 'summary': return { border: '#4ecdc4', glow: '#4ecdc4' };
-        case 'payment': return { border: '#ffe66d', glow: '#ffe66d' };
-        default: return { border: '#00f5ff', glow: '#00f5ff' };
-      }
-    } else {
-      switch (variant) {
-        case 'validate': return { border: '#2563eb', glow: '#2563eb' };
-        case 'packs': return { border: '#dc2626', glow: '#dc2626' };
-        case 'summary': return { border: '#059669', glow: '#059669' };
-        case 'payment': return { border: '#d97706', glow: '#d97706' };
-        default: return { border: '#2563eb', glow: '#2563eb' };
-      }
-    }
-  };
-
-  const colors = getColors();
-  
-  return {
-    background: currentTheme === 'dark' 
-      ? 'linear-gradient(145deg, rgba(30, 30, 60, 0.9), rgba(20, 20, 40, 0.9))'
-      : 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9))',
-    border: `2px solid ${colors.border}`,
-    borderRadius: '16px',
-    boxShadow: `0 0 20px ${alpha(colors.glow, 0.3)}, inset 0 1px 0 ${alpha(colors.glow, 0.2)}`,
-    backdropFilter: 'blur(10px)',
-    transition: 'all 0.3s ease',
+      ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)'
+      : 'linear-gradient(135deg, #f0f2ff 0%, #e6f3ff 50%, #dbeafe 100%)',
     position: 'relative',
-    overflow: 'hidden',
+    padding: '2rem 1rem',
+
     '&::before': {
       content: '""',
       position: 'absolute',
       top: 0,
-      left: '-100%',
-      width: '100%',
-      height: '100%',
-      background: `linear-gradient(90deg, transparent, ${alpha(colors.glow, 0.1)}, transparent)`,
-      transition: 'left 0.5s ease',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: currentTheme === 'dark'
+        ? `radial-gradient(circle at 20% 20%, ${alpha('#0f3460', 0.3)} 0%, transparent 50%),
+           radial-gradient(circle at 80% 80%, ${alpha('#533a7b', 0.3)} 0%, transparent 50%),
+           radial-gradient(circle at 40% 40%, ${alpha('#1e40af', 0.2)} 0%, transparent 50%)`
+        : `radial-gradient(circle at 20% 20%, ${alpha('#3b82f6', 0.1)} 0%, transparent 50%),
+           radial-gradient(circle at 80% 80%, ${alpha('#8b5cf6', 0.1)} 0%, transparent 50%)`,
+      pointerEvents: 'none',
     },
-    '&:hover': {
-      transform: 'translateY(-4px)',
-      boxShadow: `0 8px 32px ${alpha(colors.glow, 0.4)}, inset 0 1px 0 ${alpha(colors.glow, 0.3)}`,
-      '&::before': {
-        left: '100%',
-      }
-    }
-  };
-});
+  })
+);
+// 1) Create a wrapper to strip out currentTheme & variant
+const NeonCardRoot = ({ currentTheme, variant, ...otherProps }) => {
+  // We forward only valid props (e.g. className, children, sx, etc.) to <Card>
+  return <Card {...otherProps} />;
+};
 
-const PackCard = styled(Card)(({ theme, currentTheme, selected }) => ({
-  background: currentTheme === 'dark'
-    ? selected 
-      ? 'linear-gradient(145deg, rgba(0, 245, 255, 0.1), rgba(0, 200, 255, 0.05))'
-      : 'linear-gradient(145deg, rgba(40, 40, 80, 0.8), rgba(30, 30, 60, 0.8))'
-    : selected
-      ? 'linear-gradient(145deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05))'
-      : 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8))',
-  border: `2px solid ${selected 
-    ? (currentTheme === 'dark' ? '#00f5ff' : '#2563eb')
-    : (currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)')}`,
-  borderRadius: '12px',
-  cursor: 'pointer',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  position: 'relative',
-  overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: selected 
-      ? `linear-gradient(45deg, ${alpha(currentTheme === 'dark' ? '#00f5ff' : '#2563eb', 0.1)}, transparent)`
-      : 'transparent',
-    transition: 'all 0.3s ease',
-  },
-  '&:hover': {
-    transform: 'translateY(-8px) scale(1.02)',
-    boxShadow: selected
-      ? `0 20px 40px ${alpha(currentTheme === 'dark' ? '#00f5ff' : '#2563eb', 0.3)}`
-      : `0 16px 32px ${alpha(currentTheme === 'dark' ? '#ffffff' : '#000000', 0.1)}`,
+// 2) Use styled() on NeonCardRoot so we can still access currentTheme & variant in the styling callback
+export const NeonCard = styled(NeonCardRoot)(
+  ({ theme, currentTheme, variant = 'default' }) => {
+    // Compute border & glow colors based on currentTheme + variant
+    const getColors = () => {
+      if (currentTheme === 'dark') {
+        switch (variant) {
+          case 'validate': return { border: '#00f5ff', glow: '#00f5ff' };
+          case 'packs':    return { border: '#ff6b6b', glow: '#ff6b6b' };
+          case 'summary':  return { border: '#4ecdc4', glow: '#4ecdc4' };
+          case 'payment':  return { border: '#ffe66d', glow: '#ffe66d' };
+          default:         return { border: '#00f5ff', glow: '#00f5ff' };
+        }
+      } else {
+        switch (variant) {
+          case 'validate': return { border: '#2563eb', glow: '#2563eb' };
+          case 'packs':    return { border: '#dc2626', glow: '#dc2626' };
+          case 'summary':  return { border: '#059669', glow: '#059669' };
+          case 'payment':  return { border: '#d97706', glow: '#d97706' };
+          default:         return { border: '#2563eb', glow: '#2563eb' };
+        }
+      }
+    };
+
+    const { border, glow } = getColors();
+
+    return {
+      borderRadius: '16px',
+      border: `2px solid ${border}`,
+      boxShadow: `0 0 15px ${alpha(glow, 0.5)}`,
+      background: currentTheme === 'dark' ? '#1a1a1a' : '#fff',
+      color: currentTheme === 'dark' ? '#e0e0e0' : '#111',
+      overflow: 'hidden',
+      position: 'relative',
+      // If you want an additional neon‐pulse effect, you can add:
+      // animation: variant === 'validate' ? `${pulseAnimation} 2s infinite` : 'none',
+    };
+  }
+);
+
+// 1) Wrapper that strips out currentTheme and selected
+const PackCardRoot = ({ currentTheme, selected, ...otherProps }) => {
+  return <Card {...otherProps} />;
+};
+
+// 2) Styled version uses currentTheme + selected for CSS but never forwards them to DOM
+export const PackCard = styled(PackCardRoot)(
+  ({ theme, currentTheme, selected }) => ({
+    background: currentTheme === 'dark'
+      ? (selected
+          ? 'linear-gradient(145deg, rgba(0, 245, 255, 0.1), rgba(0, 200, 255, 0.05))'
+          : 'linear-gradient(145deg, rgba(40, 40, 80, 0.8), rgba(30, 30, 60, 0.8))'
+        )
+      : (selected
+          ? 'linear-gradient(145deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05))'
+          : 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8))'
+        ),
+    border: `2px solid ${
+      selected
+        ? (currentTheme === 'dark' ? '#00f5ff' : '#2563eb')
+        : (currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)')
+    }`,
+    borderRadius: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    overflow: 'hidden',
+
     '&::before': {
-      background: `linear-gradient(45deg, ${alpha(currentTheme === 'dark' ? '#00f5ff' : '#2563eb', 0.15)}, transparent)`,
-    }
-  },
-  animation: selected ? `${pulseAnimation} 2s infinite` : 'none',
-}));
-
-const NeonButton = styled(Button)(({ theme, currentTheme, variant = 'primary' }) => {
-  const getColors = () => {
-    if (currentTheme === 'dark') {
-      switch (variant) {
-        case 'success': return { bg: '#00ff88', color: '#000', glow: '#00ff88' };
-        case 'validate': return { bg: '#00f5ff', color: '#000', glow: '#00f5ff' };
-        default: return { bg: '#ff6b6b', color: '#fff', glow: '#ff6b6b' };
-      }
-    } else {
-      switch (variant) {
-        case 'success': return { bg: '#059669', color: '#fff', glow: '#059669' };
-        case 'validate': return { bg: '#2563eb', color: '#fff', glow: '#2563eb' };
-        default: return { bg: '#dc2626', color: '#fff', glow: '#dc2626' };
-      }
-    }
-  };
-
-  const colors = getColors();
-  
-  return {
-    background: `linear-gradient(45deg, ${colors.bg}, ${alpha(colors.bg, 0.8)})`,
-    color: colors.color,
-    border: `2px solid ${colors.bg}`,
-    borderRadius: '8px',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    boxShadow: `0 0 20px ${alpha(colors.glow, 0.4)}`,
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      background: `linear-gradient(45deg, ${alpha(colors.bg, 0.9)}, ${colors.bg})`,
-      boxShadow: `0 0 30px ${alpha(colors.glow, 0.6)}, 0 0 60px ${alpha(colors.glow, 0.3)}`,
-      transform: 'translateY(-2px)',
-      animation: `${neonGlow} 1.5s ease-in-out infinite`,
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: selected
+        ? `linear-gradient(45deg, ${alpha(currentTheme === 'dark' ? '#00f5ff' : '#2563eb', 0.1)}, transparent)`
+        : 'transparent',
+      transition: 'all 0.3s ease',
     },
-    '&:disabled': {
-      background: currentTheme === 'dark' ? 'rgba(100, 100, 100, 0.3)' : 'rgba(200, 200, 200, 0.3)',
-      color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
-      boxShadow: 'none',
-      animation: 'none',
-    }
-  };
-});
 
-const StepIcon = styled(Avatar)(({ theme, currentTheme, active, completed }) => ({
-  width: 48,
-  height: 48,
-  fontSize: '1.2rem',
-  fontWeight: 'bold',
-  background: completed 
-    ? (currentTheme === 'dark' ? '#00ff88' : '#059669')
-    : active 
+    '&:hover': {
+      transform: 'translateY(-8px) scale(1.02)',
+      boxShadow: selected
+        ? `0 20px 40px ${alpha(currentTheme === 'dark' ? '#00f5ff' : '#2563eb', 0.3)}`
+        : `0 16px 32px ${alpha(currentTheme === 'dark' ? '#ffffff' : '#000000', 0.1)}`,
+      '&::before': {
+        background: `linear-gradient(45deg, ${
+          alpha(currentTheme === 'dark' ? '#00f5ff' : '#2563eb', 0.15)
+        }, transparent)`,
+      },
+    },
+
+    animation: selected ? `${pulseAnimation} 2s infinite` : 'none',
+  })
+);
+
+// 1) Create a wrapper that removes custom props
+const NeonButtonRoot = ({ currentTheme, variant, ...otherProps }) => {
+  // Only pass valid props (e.g., children, onClick, disabled, sx) to <Button>
+  return <Button {...otherProps} />;
+};
+
+// 2) Use styled() on that wrapper so the callback still sees currentTheme + variant,
+//    but those props never get forwarded to the DOM element.
+export const NeonButton = styled(NeonButtonRoot)(
+  ({ theme, currentTheme, variant = 'primary' }) => {
+    // Determine colors based on currentTheme and variant
+    const getColors = () => {
+      if (currentTheme === 'dark') {
+        switch (variant) {
+          case 'success':
+            return { bg: '#00ff88', color: '#000', glow: '#00ff88' };
+          case 'validate':
+            return { bg: '#00f5ff', color: '#000', glow: '#00f5ff' };
+          default:
+            return { bg: '#ff6b6b', color: '#fff', glow: '#ff6b6b' };
+        }
+      } else {
+        switch (variant) {
+          case 'success':
+            return { bg: '#059669', color: '#fff', glow: '#059669' };
+          case 'validate':
+            return { bg: '#2563eb', color: '#fff', glow: '#2563eb' };
+          default:
+            return { bg: '#dc2626', color: '#fff', glow: '#dc2626' };
+        }
+      }
+    };
+
+    const colors = getColors();
+
+    return {
+      background: `linear-gradient(45deg, ${colors.bg}, ${alpha(colors.bg, 0.8)})`,
+      color: colors.color,
+      border: `2px solid ${colors.bg}`,
+      borderRadius: '8px',
+      fontWeight: 'bold',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      boxShadow: `0 0 20px ${alpha(colors.glow, 0.4)}`,
+      transition: 'all 0.3s ease',
+
+      '&:hover': {
+        background: `linear-gradient(45deg, ${alpha(colors.bg, 0.9)}, ${colors.bg})`,
+        boxShadow: `0 0 30px ${alpha(colors.glow, 0.6)}, 0 0 60px ${alpha(colors.glow, 0.3)}`,
+        transform: 'translateY(-2px)',
+        animation: `${neonGlow} 1.5s ease-in-out infinite`,
+      },
+
+      '&:disabled': {
+        background:
+          currentTheme === 'dark'
+            ? 'rgba(100, 100, 100, 0.3)'
+            : 'rgba(200, 200, 200, 0.3)',
+        color:
+          currentTheme === 'dark'
+            ? 'rgba(255, 255, 255, 0.3)'
+            : 'rgba(0, 0, 0, 0.3)',
+        boxShadow: 'none',
+        animation: 'none',
+      },
+    };
+  }
+);
+
+// 1) Create a small wrapper that strips out custom props
+const StepIconRoot = ({ currentTheme, active, completed, ...otherProps }) => {
+  // Only valid props (e.g. className, children) get forwarded to Avatar
+  return <Avatar {...otherProps} />;
+};
+
+// 2) Use styled() on that wrapper.
+//    The styling callback still sees currentTheme, active, completed
+export const StepIcon = styled(StepIconRoot)(
+  ({ theme, currentTheme, active, completed }) => ({
+    width: 48,
+    height: 48,
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+
+    // Background gradient or fallback based on state
+    background: completed
+      ? (currentTheme === 'dark' ? '#00ff88' : '#059669')
+      : active
       ? (currentTheme === 'dark' ? '#00f5ff' : '#2563eb')
       : (currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'),
-  color: completed || active ? '#000' : (currentTheme === 'dark' ? '#fff' : '#666'),
-  border: `2px solid ${completed || active 
-    ? (completed ? (currentTheme === 'dark' ? '#00ff88' : '#059669') : (currentTheme === 'dark' ? '#00f5ff' : '#2563eb'))
-    : (currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)')}`,
-  boxShadow: completed || active 
-    ? `0 0 20px ${alpha(completed ? (currentTheme === 'dark' ? '#00ff88' : '#059669') : (currentTheme === 'dark' ? '#00f5ff' : '#2563eb'), 0.5)}`
-    : 'none',
-  animation: active ? `${pulseAnimation} 2s infinite` : 'none',
-}));
 
-const FloatingParticle = styled(Box)(({ theme, currentTheme }) => ({
-  position: 'absolute',
-  width: '4px',
-  height: '4px',
-  background: currentTheme === 'dark' ? '#00f5ff' : '#2563eb',
-  borderRadius: '50%',
-  animation: `${floatingParticles} 6s ease-in-out infinite`,
-  opacity: 0.6,
-}));
+    // Text color when active/completed or fallback
+    color: completed || active
+      ? '#000'
+      : (currentTheme === 'dark' ? '#fff' : '#666'),
+
+    // Border color when active/completed or fallback
+    border: `2px solid ${
+      completed
+        ? (currentTheme === 'dark' ? '#00ff88' : '#059669')
+        : active
+        ? (currentTheme === 'dark' ? '#00f5ff' : '#2563eb')
+        : (currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)')
+    }`,
+
+    // Glow shadow when active/completed
+    boxShadow: completed || active
+      ? `0 0 20px ${
+          alpha(
+            completed
+              ? (currentTheme === 'dark' ? '#00ff88' : '#059669')
+              : (currentTheme === 'dark' ? '#00f5ff' : '#2563eb'),
+            0.5
+          )
+        }`
+      : 'none',
+
+    // Simple pulse animation when active
+    animation: active ? `${pulseAnimation} 2s infinite` : 'none',
+  })
+);
+
+// 1) Wrapper to strip out currentTheme before passing props to Box
+const FloatingParticleRoot = ({ currentTheme, ...otherProps }) => {
+  return <Box {...otherProps} />;
+};
+
+// 2) Styled component that still sees “currentTheme” in its callback, but never forwards it to the DOM
+export const FloatingParticle = styled(FloatingParticleRoot)(
+  ({ theme, currentTheme }) => ({
+    position: 'absolute',
+    width: '4px',
+    height: '4px',
+    background: currentTheme === 'dark' ? '#00f5ff' : '#2563eb',
+    borderRadius: '50%',
+    animation: `${floatingParticles} 6s ease-in-out infinite`, // use your existing keyframes
+    opacity: 0.6,
+  })
+);
 
 const GameDisplay = () => {
   const { gameId } = useParams();
@@ -304,43 +389,66 @@ const GameDisplay = () => {
   const [activeStep, setActiveStep] = useState(0);
 
   // Mock data for demo
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setGame({
-        _id: '1',
-        name: 'Valorant',
-        image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop',
-        region: 'Global',
-        category: 'FPS',
-        packs: [
-          { packId: '1', name: 'Starter Pack', amount: '1000 VP', retailPrice: 999, resellerPrice: 899, description: 'Perfect for beginners' },
-          { packId: '2', name: 'Warrior Pack', amount: '2500 VP', retailPrice: 2499, resellerPrice: 2299, description: 'Most popular choice' },
-          { packId: '3', name: 'Legend Pack', amount: '5000 VP', retailPrice: 4999, resellerPrice: 4599, description: 'Maximum value' },
-          { packId: '4', name: 'Ultimate Pack', amount: '10000 VP', retailPrice: 9999, resellerPrice: 8999, description: 'For serious gamers' },
-        ]
-      });
+useEffect(() => {
+  const fetchGame = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/games/${gameId}`);
+      const data = await response.json();
+      if (response.ok && data.success && data.game) {
+        setGame(data.game);
+      } else {
+        navigate('/games');
+      }
+    } catch (error) {
+      console.error('Error fetching game:', error);
+      navigate('/games');
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  fetchGame();
+}, [gameId, navigate, API_BASE]);
 
   // Functions
-  const validateUser = async () => {
-    if (!userInfo.userId.trim()) {
-      alert('Please enter your User ID');
-      return;
-    }
+ const validateUser = async () => {
+  if (!userInfo.userId.trim()) {
+    alert('Please enter your User ID');
+    return;
+  }
 
-    setValidating(true);
-    // Simulate validation
-    setTimeout(() => {
-      setValidationResult({ username: userInfo.userId });
+  setValidating(true);
+  try {
+    const response = await fetch(`${API_BASE}/games/validate-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        gameId: gameId,
+        userId: userInfo.userId,
+        serverId: ""
+      }),
+    });
+
+    const data = await response.json();
+    if (response.ok && data.success && data.valid) {
+      setValidationResult(data.data);
       setShowValidationAlert(true);
       setActiveStep(1);
       setTimeout(() => setShowValidationAlert(false), 3000);
-      setValidating(false);
-    }, 2000);
-  };
+    } else {
+      alert(data.message || 'User validation failed');
+      setValidationResult(null);
+    }
+  } catch (error) {
+    console.error('Error validating user:', error);
+    alert('An error occurred during validation');
+    setValidationResult(null);
+  } finally {
+    setValidating(false);
+  }
+};
 
   const handlePackSelect = (pack) => {
     setSelectedPack(pack);
@@ -472,7 +580,7 @@ const GameDisplay = () => {
 
       <Grid container spacing={4}>
         {/* Game Info Sidebar */}
-        <Grid item xs={12} lg={3}>
+        <Grid2 xs={12} lg={3}>
           <Slide direction="right" in={true} timeout={1000}>
             <NeonCard currentTheme={currentTheme} variant="default">
               <Box sx={{ position: 'relative', height: 200, overflow: 'hidden', borderRadius: '12px 12px 0 0' }}>
@@ -547,10 +655,10 @@ const GameDisplay = () => {
               </CardContent>
             </NeonCard>
           </Slide>
-        </Grid>
+        </Grid2>
 
         {/* Main Content */}
-        <Grid item xs={12} lg={6}>
+        <Grid2 xs={12} lg={6}>
           {/* User Validation */}
           <Slide direction="up" in={true} timeout={1200}>
             <NeonCard currentTheme={currentTheme} variant="validate" sx={{ mb: 4 }}>
@@ -680,7 +788,7 @@ const GameDisplay = () => {
                                     boxShadow: `0 0 20px ${alpha(currentTheme === 'dark' ? '#ff6b6b' : '#dc2626', 0.5)}`
                                   }}
                                 >
-                                  {pack.amount.match(/\d+/)[0].slice(0, 2)}
+                                  {String(pack.amount).match(/\d+/)[0].slice(0, 2)}
                                 </Avatar>
                               </Box>
 
@@ -752,10 +860,10 @@ const GameDisplay = () => {
               </CardContent>
             </NeonCard>
           </Slide>
-        </Grid>
+        </Grid2>
 
         {/* Order Summary & Payment */}
-        <Grid item xs={12} lg={3}>
+        <Grid2 xs={12} lg={3}>
           {/* Order Summary */}
           {selectedPack && (
             <Slide direction="left" in={true} timeout={1600}>
@@ -962,7 +1070,7 @@ const GameDisplay = () => {
               </NeonCard>
             </Slide>
           )}
-        </Grid>
+        </Grid2>
       </Grid>
 
       {/* Success Animation */}
