@@ -1,0 +1,77 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background: var(--card-bg-color);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  position: fixed;
+  left: 0;
+  top: 0;
+  /* z-index: 1000; */
+}
+
+.collapsed {
+  width: 70px;
+}
+
+/* .dark {
+  /* Add dark mode overrides if desired */
+
+
+.sidebarHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 1rem 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  width: 100%;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.navItem:hover {
+  background: var(--hover-color);
+  transform: translateX(4px);
+}
+
+.active {
+  background: var(--primary-color);
+  color: white;
+  border-radius: 0 25px 25px 0;
+  margin-right: 10px;
+}
+
+.sidebarFooter {
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.logoutBtn {
+  color: #ef4444;
+}
+
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}

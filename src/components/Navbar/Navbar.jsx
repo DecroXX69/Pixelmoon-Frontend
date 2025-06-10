@@ -21,7 +21,7 @@ const Navbar = () => {
       <div className={styles.container}>
         <Link to="/" className={styles.logoContainer}>
           <img 
-            src="/src/assets/logo2.png" 
+            src="/src/assets/pixel.mp4" 
             alt="Digital Topup Logo" 
             className={styles.logo}
           />

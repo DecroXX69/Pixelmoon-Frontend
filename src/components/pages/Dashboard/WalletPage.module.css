@@ -1,0 +1,376 @@
+.walletPage {
+  padding: 2rem;
+}
+
+.pageHeader {
+  margin-bottom: 2rem;
+}
+
+.pageHeader h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.pageHeader p {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.walletBalanceCard {
+  background: linear-gradient(135deg, var(--primary-color), #2563eb);
+  color: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balanceInfo h3 {
+  margin: 0 0 0.5rem 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.balanceAmount {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.addMoneyBtn {
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.addMoneyBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.walletTabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tabBtn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg-color);
+  color: var(--text-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.tabBtn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.walletHistoryContainer {
+  background: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.loadingState, .emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.loadingState svg {
+  animation: spin 1s linear infinite;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.emptyState svg {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.emptyState h3 {
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.emptyState p {
+  margin: 0;
+  opacity: 0.7;
+  max-width: 300px;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.historyItem:hover {
+  transform: translateY(-1px);
+}
+
+.historyIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.creditIcon {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.debitIcon {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.historyDetails {
+  flex: 1;
+}
+
+.historyDetails h4 {
+  margin: 0 0 0.25rem 0;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.historyDetails p {
+  margin: 0;
+  color: var(--text-color);
+  opacity: 0.7;
+  font-size: 0.875rem;
+}
+
+.historyAmount {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.historyAmount.credit {
+  color: #10b981;
+}
+
+.historyAmount.debit {
+  color: #ef4444;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background: var(--card-bg-color);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.modalHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.25rem;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.modalClose:hover {
+  background: var(--hover-color);
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.formControl {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.formControl:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.quickAmounts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.quickAmountBtn {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--background-color);
+  color: var(--text-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.quickAmountBtn:hover {
+  border-color: var(--primary-color);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.modalFooter {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.btnPrimary, .btnOutline {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btnPrimary {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnOutline {
+  background: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btnOutline:hover {
+  background: var(--hover-color);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .walletPage {
+    padding: 1rem;
+  }
+
+  .walletBalanceCard {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .balanceAmount {
+    font-size: 2rem;
+  }
+
+  .walletTabs {
+    flex-direction: column;
+  }
+
+  .modalContent {
+    width: 95%;
+    margin: 1rem;
+  }
+}

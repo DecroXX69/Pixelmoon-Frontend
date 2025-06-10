@@ -1,0 +1,77 @@
+.dashboardPage {
+  padding: 2rem;
+}
+
+.pageHeader {
+  margin-bottom: 2rem;
+}
+
+.pageHeader h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.pageHeader p {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.quickActions h3 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.actionCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.actionCard {
+  background: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.actionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  color: var(--primary-color);
+}
+
+ .loadingContainer {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              height: 400px;
+              color: var(--text-color);
+            }
+            
+            .loadingSpinner {
+              animation: spin 1s linear infinite;
+              color: var(--primary-color);
+            }
+            
+            @keyframes spin {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }

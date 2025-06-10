@@ -1,0 +1,119 @@
+.page-header {
+          margin-bottom: 2rem;
+        }
+        
+        .page-header h2 {
+          margin: 0;
+          color: var(--text-color);
+        }
+        
+        .page-header p {
+          margin: 0.5rem 0 0 0;
+          color: var(--text-color);
+          opacity: 0.7;
+        }
+        
+        .orders-container {
+          background: var(--card-bg-color);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: 1.5rem;
+        }
+        
+        .loading-state, .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 3rem;
+          color: var(--text-color);
+        }
+        
+        .loading-spinner {
+          animation: spin 1s linear infinite;
+          color: var(--primary-color);
+          margin-bottom: 1rem;
+        }
+        
+        .empty-state svg {
+          color: var(--primary-color);
+          margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+          margin: 1rem 0 0.5rem 0;
+        }
+        
+        .orders-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 1rem;
+        }
+        
+        .order-card {
+          background: var(--background-color);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          padding: 1rem;
+          transition: transform 0.3s ease;
+        }
+        
+        .order-card:hover {
+          transform: translateY(-2px);
+        }
+        
+        .order-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+        
+        .order-id {
+          font-weight: bold;
+          color: var(--text-color);
+        }
+        
+        .order-status {
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.8rem;
+          text-transform: uppercase;
+        }
+        
+        .order-status.pending {
+          background: #fbbf24;
+          color: #92400e;
+        }
+        
+        .order-status.processing {
+          background: #60a5fa;
+          color: #1e40af;
+        }
+        
+        .order-status.completed {
+          background: #34d399;
+          color: #065f46;
+        }
+        
+        .order-status.failed {
+          background: #f87171;
+          color: #991b1b;
+        }
+        
+        .order-details h4 {
+          margin: 0 0 0.5rem 0;
+          color: var(--text-color);
+        }
+        
+        .order-details p {
+          margin: 0.25rem 0;
+          color: var(--text-color);
+          opacity: 0.8;
+          font-size: 0.9rem;
+        }
+        
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }

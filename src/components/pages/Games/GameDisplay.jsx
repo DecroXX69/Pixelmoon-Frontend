@@ -32,7 +32,7 @@ import {
   Divider,
   LinearProgress
 } from '@mui/material';
-import { styled, keyframes, alpha } from '@mui/material/styles';
+import { styled, keyframes, alpha, useTheme as useMuiTheme } from '@mui/material/styles';
 import {
   CheckCircle,
   Person,
@@ -94,6 +94,52 @@ const floatingParticles = keyframes`
 `;
 
 // Styled Components
+
+// Add new keyframes for light mode effects
+const floatAnimation = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+`;
+
+const rotateAnimation = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
+const sakuraFall = keyframes`
+  0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+`;
+
+// Sakura Petal Component
+const SakuraPetal = ({ currentTheme }) => {
+  if (currentTheme !== 'light') return null;
+  
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: `${Math.random() * 100}%`,
+        fontSize: '24px',
+        color: '#ffb7c5',
+        animation: `${sakuraFall} ${10 + Math.random() * 20}s linear infinite`,
+        animationDelay: `${Math.random() * 5}s`,
+        userSelect: 'none',
+        pointerEvents: 'none',
+        zIndex: 1,
+      }}
+    >
+      ❀
+    </Box>
+  );
+};
+
+
+
+
 // 1) A root wrapper that strips out the custom prop
 const PixelmoonContainerRoot = ({ currentTheme, ...otherProps }) => {
   return <Container {...otherProps} />;
@@ -489,6 +535,12 @@ useEffect(() => {
 
   return (
     <PixelmoonContainer maxWidth="xl" currentTheme={currentTheme}>
+
+  {/* Add Sakura Petals for light mode */}
+      {currentTheme === 'light' && [...Array(15)].map((_, i) => (
+        <SakuraPetal key={`petal-${i}`} currentTheme={currentTheme} />
+      ))}
+
       {/* Floating Particles */}
       {[...Array(20)].map((_, i) => (
         <FloatingParticle

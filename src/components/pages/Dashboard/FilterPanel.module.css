@@ -1,0 +1,92 @@
+/* src/components/FilterPanel/FilterPanel.module.css */
+.filterPanel {
+  background: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.open {
+  max-height: 1000px; /* large enough to show content */
+}
+
+.filterHeader {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.filterHeader h4 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.toggleBtn:hover {
+  background: var(--hover-color);
+}
+
+.filterContent {
+  padding: 0 1.5rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.form-control {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+        
+        .btn {
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+          background: var(--primary-color);
+          color: white;
+        }
+        
+        .btn-primary:hover {
+          background: #2563eb;
+          transform: translateY(-1px);
+        }
+        
+        .btn-outline-danger {
+          background: transparent;
+          color: #ef4444;
+          border: 1px solid #ef4444;
+        }
+        
+        .btn-outline-danger:hover {
+          background: #ef4444;
+          color: white;
+        }
